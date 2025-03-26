@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wave Cafe HTML Template by Tooplate</title>
+    <link rel="stylesheet" href="fontawesome/css/all.min.css"> <!-- https://fontawesome.com/ -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400" rel="stylesheet" /> <!-- https://fonts.google.com/ -->
+    <link rel="stylesheet" href="css/tooplate-wave-cafe.css">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!--
+Tooplate 2121 Wave Cafe
+https://www.tooplate.com/view/2121-wave-cafe
+-->
+</head>
+<body>
+  <div class="tm-container">
+    <div class="tm-row">
+      <!-- Site Header -->
+      <div class="tm-left">
+        <div class="tm-left-inner">
+          <div class="tm-site-header">
+            <i class="fas fa-coffee fa-3x tm-site-logo"></i>
+            <h1 class="tm-site-name">Wave Cafe</h1>
+          </div>
+          <nav class="tm-site-nav">
+            <ul class="tm-site-nav-ul">
+              <li class="tm-page-nav-item">
+                <a href="#drink" class="tm-page-link active">
+                  <i class="fas fa-mug-hot tm-page-link-icon"></i>
+                  <span>Menu</span>
+                </a>
+              </li>
+              <li class="tm-page-nav-item">
+                  <a href="#" class="tm-page-link" id="openBill">
+                      <i class="fas fa-money-bill-wave tm-page-link-icon"></i>
+                      <span>Thanh Toán</span>
+                  </a>
+              </li>
+              <li class="tm-page-nav-item">
+                <a href="#special" class="tm-page-link">
+                  <i class="fas fa-receipt tm-page-link-icon"></i>
+                  <span>Order</span>
+                </a>
+              </li>
+              <li class="tm-page-nav-item">
+                <a href="#contact" class="tm-page-link">
+                  <i class="fas fa-comments tm-page-link-icon"></i>
+                  <span>Manager</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>        
+      </div>
+      <div class="tm-right">
+        <main class="tm-main">
+          <div id="drink" class="tm-page-content">
+            <!-- Drink Menu Page -->
+            <nav class="tm-black-bg tm-drinks-nav">
+              <ul>
+                <li>
+                  <a href="#" class="tm-tab-link active" data-id="cold">Iced Coffee</a>
+                </li>
+                <li>
+                  <a href="#" class="tm-tab-link" data-id="hot">Hot Coffee</a>
+                </li>
+                <li>
+                  <a href="#" class="tm-tab-link" data-id="juice">Fruit Juice</a>
+                </li>
+              </ul>
+            </nav>
+
+            <div id="cold" class="tm-tab-content">
+              <div class="tm-list">
+                <div class="tm-list-item" id="item-iced-americano">
+                  <img src="img/iced-americano.png" alt="Image" class="tm-list-item-img">
+                  <div class="tm-black-bg tm-list-item-text">
+                      <h3 class="tm-list-item-name">
+                          Iced Americano
+                          <span class="tm-list-item-price">$10.25</span>
+                      </h3>
+                      <p class="tm-list-item-description">Mô tả ngắn về món này.</p>
+                      <div class="d-flex align-items-center">
+                          <button class="btn btn-sm btn-danger mr-2 toggle-availability" data-item="iced-americano">Hết món</button>
+                          <button class="btn btn-sm btn-secondary decrease" data-item="iced-americano">-</button>
+                          <span id="qty-iced-americano" class="mx-2">0</span>
+                          <button class="btn btn-sm btn-primary increase" data-item="iced-americano">+</button>
+                      </div>
+                  </div>
+                </div>
+                <div class="tm-list-item" id="item-iced-cappuccino">
+                  <img src="img/iced-cappuccino.png" alt="Image" class="tm-list-item-img">
+                  <div class="tm-black-bg tm-list-item-text">
+                      <h3 class="tm-list-item-name">Iced Cappuccino<span class="tm-list-item-price">$12.50</span></h3>
+                      <p class="tm-list-item-description">Mô tả ngắn về món này.</p>
+                      <div class="d-flex align-items-center">
+                          <button class="btn btn-sm btn-danger mr-2 toggle-availability" data-item="iced-cappuccino">Hết món</button>
+                          <button class="btn btn-sm btn-secondary decrease" data-item="iced-cappuccino">-</button>
+                          <span id="qty-iced-cappuccino" class="mx-2">0</span>
+                          <button class="btn btn-sm btn-primary increase" data-item="iced-cappuccino">+</button>
+                      </div>
+                  </div>
+              </div>
+      
+              <div class="tm-list-item" id="item-iced-espresso">
+                  <img src="img/iced-espresso.png" alt="Image" class="tm-list-item-img">
+                  <div class="tm-black-bg tm-list-item-text">
+                      <h3 class="tm-list-item-name">Iced Espresso<span class="tm-list-item-price">$14.25</span></h3>
+                      <p class="tm-list-item-description">Mô tả ngắn về món này.</p>
+                      <div class="d-flex align-items-center">
+                          <button class="btn btn-sm btn-danger mr-2 toggle-availability" data-item="iced-espresso">Hết món</button>
+                          <button class="btn btn-sm btn-secondary decrease" data-item="iced-espresso">-</button>
+                          <span id="qty-iced-espresso" class="mx-2">0</span>
+                          <button class="btn btn-sm btn-primary increase" data-item="iced-espresso">+</button>
+                      </div>
+                  </div>
+              </div>
+                <div class="tm-list-item">          
+                  <img src="img/iced-latte.png" alt="Image" class="tm-list-item-img">
+                  <div class="tm-black-bg tm-list-item-text">
+                    <h3 class="tm-list-item-name">Iced Latte<span class="tm-list-item-price">$11.50</span></h3>
+                    <p class="tm-list-item-description">Contents are organized into 3 tabs. Please <a href="https://www.tooplate.com/contact" rel="nofollow" target="_parent">contact Tooplate</a> if you have anything to ask.</p>
+                  </div>
+                </div> 
+                                       
+              </div>
+            </div> 
+
+            <div id="hot" class="tm-tab-content">
+              <div class="tm-list">
+              
+                <div class="tm-list-item" id="item-hot-americano">
+                  <img src="img/hot-americano.png" alt="Image" class="tm-list-item-img">
+                  <div class="tm-black-bg tm-list-item-text">
+                      <h3 class="tm-list-item-name">Hot Americano<span class="tm-list-item-price">$8.50</span></h3>
+                      <p class="tm-list-item-description">Mô tả ngắn về món này.</p>
+                      <div class="d-flex align-items-center">
+                          <button class="btn btn-sm btn-danger mr-2 toggle-availability" data-item="hot-americano">Hết món</button>
+                          <button class="btn btn-sm btn-secondary decrease" data-item="hot-americano">-</button>
+                          <span id="qty-hot-americano" class="mx-2">0</span>
+                          <button class="btn btn-sm btn-primary increase" data-item="hot-americano">+</button>
+                      </div>
+                  </div>
+              </div>
+                <div class="tm-list-item">          
+                  <img src="img/hot-cappuccino.png" alt="Image" class="tm-list-item-img">
+                  <div class="tm-black-bg tm-list-item-text">
+                    <h3 class="tm-list-item-name">Hot Cappuccino<span class="tm-list-item-price">$9.50</span></h3>
+                    <p class="tm-list-item-description">Here is a list of 4 items that can add more as you need. Only content area will be scrolling.</p>                    
+                  </div>
+                </div>
+                <div class="tm-list-item">          
+                  <img src="img/hot-espresso.png" alt="Image" class="tm-list-item-img">
+                  <div class="tm-black-bg tm-list-item-text">
+                    <h3 class="tm-list-item-name">Hot Espresso<span class="tm-list-item-price">$7.50</span></h3>
+                    <p class="tm-list-item-description">Left side logo and main menu are fixed. The video background is fixed.</p>              
+                  </div>
+                </div>
+                <div class="tm-list-item">          
+                  <img src="img/hot-latte.png" alt="Image" class="tm-list-item-img">
+                  <div class="tm-black-bg tm-list-item-text">
+                    <h3 class="tm-list-item-name">Hot Latte<span class="tm-list-item-price">$6.50</span></h3>
+                    <p class="tm-list-item-description">Page contents are organized into 3 tabs to show different lists of items.</p>              
+                  </div>
+                </div>
+                         
+              </div>
+            </div>
+
+            <div id="juice" class="tm-tab-content">
+              <div class="tm-list">
+                <div class="tm-list-item">          
+                  <img src="img/smoothie-1.png" alt="Image" class="tm-list-item-img">
+                  <div class="tm-black-bg tm-list-item-text">
+                    <h3 class="tm-list-item-name">Strawberry Smoothie<span class="tm-list-item-price">$12.50</span></h3>
+                    <p class="tm-list-item-description">Here is a short description for the item along with a squared thumbnail.</p>              
+                  </div>
+                </div>
+                <div class="tm-list-item">          
+                  <img src="img/smoothie-2.png" alt="Image" class="tm-list-item-img">
+                  <div class="tm-black-bg tm-list-item-text">
+                    <h3 class="tm-list-item-name">Red Berry Smoothie<span class="tm-list-item-price">$14.50</span></h3>
+                    <p class="tm-list-item-description">Here is a list of 4 items or add more. You can use this template for commercial purposes.</p>                    
+                  </div>
+                </div>
+                <div class="tm-list-item">          
+                  <img src="img/smoothie-3.png" alt="Image" class="tm-list-item-img">
+                  <div class="tm-black-bg tm-list-item-text">
+                    <h3 class="tm-list-item-name">Pineapple Smoothie<span class="tm-list-item-price">$16.50</span></h3>
+                    <p class="tm-list-item-description">Left side logo and main menu are fixed. The video background is fixed.</p>              
+                  </div>
+                </div>
+                <div class="tm-list-item">          
+                  <img src="img/smoothie-4.png" alt="Image" class="tm-list-item-img">
+                  <div class="tm-black-bg tm-list-item-text">
+                    <h3 class="tm-list-item-name">Spinach Smoothie<span class="tm-list-item-price">$18.50</span></h3>
+                    <p class="tm-list-item-description">You are not allowed to redistribute the template ZIP file on other template sites.</p>              
+                  </div>
+                </div>              
+              </div>
+            </div>
+            <!-- end Drink Menu Page -->
+          </div>
+
+          <!-- Modal Hiển thị Bill -->
+          <div class="modal fade" id="billModal" tabindex="-1" role="dialog" aria-labelledby="billModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="billModalLabel">Bill Check</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Món</th>
+                                    <th>Số lượng</th>
+                                    <th>Giá</th>
+                                </tr>
+                            </thead>
+                            <tbody id="billItems">
+                                <!-- Các món ăn sẽ được hiển thị ở đây -->
+                                <tr>
+                                    <td>Iced Americano</td>
+                                    <td>1</td>
+                                    <td>$10.25</td>
+                                </tr>
+                                <tr>
+                                    <td>Iced Cappuccino</td>
+                                    <td>2</td>
+                                    <td>$12.50</td>
+                                </tr>
+                                <tr>
+                                    <td>Iced Espresso</td>
+                                    <td>1</td>
+                                    <td>$14.25</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <h5 class="text-right">Total: <span id="totalPrice">$49.50</span></h5>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                        <button type="button" class="btn btn-primary" id="confirmPaymentBtn">Tiến hành thanh toán</button>
+
+                    </div>
+                </div>
+            </div>
+          </div>
+
+          <!-- Modal Nhập Secret Code -->
+          <div class="modal fade" id="secretCodeModal" tabindex="-1" role="dialog" aria-labelledby="secretCodeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="secretCodeModalLabel">Xác nhận nhân viên</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Nhập mã xác nhận của nhân viên để tiếp tục:</p>
+                        <input type="password" id="secretCodeInput" class="form-control" placeholder="Nhập mã xác nhận">
+                        <p id="errorMsg" class="text-danger mt-2" style="display: none;">Mã không đúng, vui lòng thử lại.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                        <button type="button" class="btn btn-success" id="verifySecretCode">Xác nhận</button>
+                    </div>
+                </div>
+            </div>
+          </div>
+
+
+          <!-- Special Items Page -->
+          <div id="special" class="tm-page-content">
+            <h2 class="tm-text-primary text-center mb-4">Danh sách Order trong bếp</h2>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Món</th>
+                            <th>Số lượng</th>
+                            <th>Bàn số</th>
+                            <th>Ghi chú</th>
+                            <th>Thời gian</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orderList">
+                        <!-- Đơn hàng sẽ được load ở đây -->
+                        <tr id="order-1">
+                            <td>Pizza Hải Sản</td>
+                            <td>2</td>
+                            <td>5</td>
+                            <td>Ít cay</td>
+                            <td>12:30 PM</td>
+                            <td><span class="badge badge-warning">Đang làm</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-success completeOrder" data-id="1">Hoàn thành</button>
+                                <button class="btn btn-sm btn-danger cancelOrder" data-id="1">Hủy</button>
+                            </td>
+                        </tr>
+                        <tr id="order-2">
+                            <td>Bún bò Huế</td>
+                            <td>1</td>
+                            <td>3</td>
+                            <td>Không hành</td>
+                            <td>12:35 PM</td>
+                            <td><span class="badge badge-warning">Đang làm</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-success completeOrder" data-id="2">Hoàn thành</button>
+                                <button class="btn btn-sm btn-danger cancelOrder" data-id="2">Hủy</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+          <!-- end Special Items Page -->
+
+          <!-- Contact Page -->
+          <div id="contact" class="tm-page-content">
+            <h2 class="tm-text-primary text-center mb-4">Quản lý hóa đơn</h2>
+        
+            <!-- Secret Code -->
+            <div class="d-flex justify-content-between mb-3">
+                <button id="generateSecretCode" class="btn btn-danger">Generate Secret Code</button>
+                <span id="secretCodeDisplay" class="font-weight-bold text-danger" style="font-size: 20px;"></span>
+            </div>
+        
+            <!-- Danh sách hóa đơn -->
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Bàn</th>
+                            <th>Món đã gọi</th>
+                            <th>Tổng tiền</th>
+                            <th>Thời gian mở bàn → Thanh toán</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orderManagerList">
+                        <!-- Hóa đơn sẽ hiển thị tại đây -->
+                        <tr id="bill-1">
+                            <td>1</td>
+                            <td>101</td>
+                            <td>Pizza Hải Sản, Coca Cola, Salad</td>
+                            <td>$25.75</td>
+                            <td>7:00 PM → 8:25 PM</td>
+                            <td>
+                                <button class="btn btn-sm btn-danger deleteBill" data-id="1">Xóa</button>
+                            </td>
+                        </tr>
+                        <tr id="bill-2">
+                            <td>2</td>
+                            <td>102</td>
+                            <td>Bún bò Huế, Trà Đào</td>
+                            <td>$12.50</td>
+                            <td>8:26 PM → 9:05 PM</td>
+                            <td>
+                                <button class="btn btn-sm btn-danger deleteBill" data-id="2">Xóa</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+          <!-- end Contact Page -->
+        </main>
+      </div>    
+    </div>
+  </div>
+    
+  <!-- Background video -->
+  <div class="tm-video-wrapper">
+      <i id="tm-video-control-button" class="fas fa-pause"></i>
+      <video autoplay muted loop id="tm-video">
+          <source src="video/wave-cafe-video-bg.mp4" type="video/mp4">
+      </video>
+  </div>
+
+  <script>
+
+    function setVideoSize() {
+      const vidWidth = 1920;
+      const vidHeight = 1080;
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+      const tempVidWidth = windowHeight * vidWidth / vidHeight;
+      const tempVidHeight = windowWidth * vidHeight / vidWidth;
+      const newVidWidth = tempVidWidth > windowWidth ? tempVidWidth : windowWidth;
+      const newVidHeight = tempVidHeight > windowHeight ? tempVidHeight : windowHeight;
+      const tmVideo = $('#tm-video');
+
+      tmVideo.css('width', newVidWidth);
+      tmVideo.css('height', newVidHeight);
+    }
+
+    function openTab(evt, id) {
+      $('.tm-tab-content').hide();
+      $('#' + id).show();
+      $('.tm-tab-link').removeClass('active');
+      $(evt.currentTarget).addClass('active');
+    }    
+
+    function initPage() {
+      let pageId = location.hash;
+
+      if(pageId) {
+        highlightMenu($(`.tm-page-link[href^="${pageId}"]`)); 
+        showPage($(pageId));
+      }
+      else {
+        pageId = $('.tm-page-link.active').attr('href');
+        showPage($(pageId));
+      }
+    }
+
+    function highlightMenu(menuItem) {
+      $('.tm-page-link').removeClass('active');
+      menuItem.addClass('active');
+    }
+
+    function showPage(page) {
+      $('.tm-page-content').hide();
+      page.show();
+    }
+
+    $(document).ready(function(){
+
+      /***************** Pages *****************/
+
+      initPage();
+
+      $('.tm-page-link').click(function(event) {
+        
+        if(window.innerWidth > 991) {
+          event.preventDefault();
+        }
+
+        highlightMenu($(event.currentTarget));
+        showPage($(event.currentTarget.hash));
+      });
+
+      
+      /***************** Tabs *******************/
+
+      $('.tm-tab-link').on('click', e => {
+        e.preventDefault(); 
+        openTab(e, $(e.target).data('id'));
+      });
+
+      $('.tm-tab-link.active').click(); // Open default tab
+
+
+      /************** Video background *********/
+
+      setVideoSize();
+
+      // Set video background size based on window size
+      let timeout;
+      window.onresize = function(){
+        clearTimeout(timeout);
+        timeout = setTimeout(setVideoSize, 100);
+      };
+
+      // Play/Pause button for video background      
+      const btn = $("#tm-video-control-button");
+
+      btn.on("click", function(e) {
+        const video = document.getElementById("tm-video");
+        $(this).removeClass();
+
+        if (video.paused) {
+          video.play();
+          $(this).addClass("fas fa-pause");
+        } else {
+          video.pause();
+          $(this).addClass("fas fa-play");
+        }
+      });
+    });
+
+    $(document).ready(function () {
+      $("#openBill").click(function (e) {
+          e.preventDefault();
+          $("#billModal").modal("show");
+      });
+    });
+  
+    $(document).ready(function () {
+      // Khi nhấn "Tiến hành thanh toán", hiển thị popup nhập Secret Code
+      $("#confirmPaymentBtn").click(function () {
+          $("#secretCodeModal").modal("show");
+      });
+  
+      // Xử lý khi nhập mã xác nhận
+      $("#verifySecretCode").click(function () {
+        var secretCode = $("#secretCodeInput").val();
+        var correctCode = "1234"; // Mã xác nhận cố định (sau này có thể đổi sang mã động)
+
+        if (secretCode === correctCode) {
+            alert("Thanh toán thành công!");
+            $("#secretCodeModal").modal("hide"); // Đóng popup Secret Code
+            $("#billModal").modal("hide"); // Đóng popup Bill
+
+            // Xóa thông tin bàn khỏi session để buộc về màn hình Lock
+            sessionStorage.removeItem("tableNumber");
+
+            // Chuyển hướng về màn hình Lock
+            setTimeout(function () {
+                window.location.href = "lock.html";
+            }, 500); // Chờ 0.5 giây rồi chuyển trang
+        } else {
+            $("#errorMsg").show(); // Hiển thị lỗi nếu nhập sai mã
+        }
+    });
+  
+      // Ẩn thông báo lỗi khi người dùng bắt đầu nhập lại
+      $("#secretCodeInput").on("input", function () {
+          $("#errorMsg").hide();
+      });
+  });
+  
+  $(document).ready(function () {
+    // Xử lý tăng số lượng món ăn
+    $(".increase").click(function () {
+        let item = $(this).data("item");
+        let qtyElement = $("#qty-" + item);
+        let qty = parseInt(qtyElement.text());
+
+        if (!$("#item-" + item).hasClass("out-of-stock")) {
+            qtyElement.text(qty + 1);
+        }
+    });
+
+    // Xử lý giảm số lượng món ăn
+    $(".decrease").click(function () {
+        let item = $(this).data("item");
+        let qtyElement = $("#qty-" + item);
+        let qty = parseInt(qtyElement.text());
+
+        if (qty > 0) {
+            qtyElement.text(qty - 1);
+        }
+    });
+
+    // Xử lý bật/tắt món ăn (hết hàng hoặc còn hàng)
+    $(".toggle-availability").click(function () {
+        let item = $(this).data("item");
+        let itemElement = $("#item-" + item);
+        let qtyElement = $("#qty-" + item);
+
+        if (itemElement.hasClass("out-of-stock")) {
+            itemElement.removeClass("out-of-stock");
+            $(this).text("Hết món").removeClass("btn-success").addClass("btn-danger");
+            qtyElement.text("0"); // Reset số lượng khi mở bán lại
+        } else {
+            itemElement.addClass("out-of-stock");
+            $(this).text("Còn món").removeClass("btn-danger").addClass("btn-success");
+            qtyElement.text("Hết món");
+        }
+      });
+    });
+
+    $(document).ready(function () {
+      // Khi nhấn "Hoàn thành", đổi trạng thái và tự động xóa sau 3s
+      $(".completeOrder").click(function () {
+          let orderId = $(this).data("id");
+          let row = $("#order-" + orderId);
+          
+          row.find("td:nth-child(6) span").removeClass("badge-warning").addClass("badge-success").text("Hoàn thành");
+          $(this).remove(); // Xóa nút "Hoàn thành"
+
+          // Sau 5 giây, tự động xóa hàng
+          setTimeout(function () {
+              row.fadeOut(300, function () {
+                  $(this).remove();
+              });
+          }, 3000); //Sửa lại thời gian ở đây
+      });
+      // Khi nhấn "Hủy", xóa đơn khỏi danh sách
+      $(".cancelOrder").click(function () {
+          let orderId = $(this).data("id");
+          $("#order-" + orderId).fadeOut(300, function () {
+              $(this).remove();
+          });
+      });
+  });
+  
+  $(document).ready(function () {
+    // Khi nhấn "Xóa", hóa đơn sẽ bị xóa khỏi danh sách
+    $(".deleteBill").click(function () {
+        let billId = $(this).data("id");
+        $("#bill-" + billId).fadeOut(300, function () {
+            $(this).remove();
+        });
+    });
+
+    // Khi nhấn "Generate Secret Code", tạo mã mới
+    $("#generateSecretCode").click(function () {
+        let secretCode = Math.floor(1000 + Math.random() * 9000); // Tạo mã 4 chữ số ngẫu nhiên
+        $("#secretCodeDisplay").text("Secret Code: " + secretCode);
+    });
+});
+
+$(document).ready(function () {
+  let lastGeneratedTime = 0;
+  const cooldownTime = 10 * 60 * 1000; // 10 phút (600,000 milliseconds)
+
+  $("#generateSecretCode").click(function () {
+      let currentTime = new Date().getTime();
+
+      // Kiểm tra nếu đã đủ 10 phút từ lần cuối tạo mã
+      if (currentTime - lastGeneratedTime >= cooldownTime) {
+          let secretCode = Math.floor(1000 + Math.random() * 9000); // Tạo mã 4 chữ số ngẫu nhiên
+          $("#secretCodeDisplay").text("Secret Code: " + secretCode);
+
+          lastGeneratedTime = currentTime; // Cập nhật thời gian tạo mã
+          $(this).prop("disabled", true); // Khóa nút
+          startCooldownTimer(); // Bắt đầu đếm ngược
+      } else {
+          let remainingTime = Math.ceil((cooldownTime - (currentTime - lastGeneratedTime)) / 1000);
+          let minutes = Math.floor(remainingTime / 60);
+          let seconds = remainingTime % 60;
+
+          $("#secretCodeDisplay").text(`Chờ ${minutes} phút ${seconds} giây để tạo mã mới.`);
+      }
+  });
+
+  // Hàm đếm ngược để mở lại nút sau 10 phút
+  function startCooldownTimer() {
+      let interval = setInterval(function () {
+          let currentTime = new Date().getTime();
+          let remainingTime = Math.ceil((cooldownTime - (currentTime - lastGeneratedTime)) / 1000);
+
+          if (remainingTime <= 0) {
+              clearInterval(interval);
+              $("#generateSecretCode").prop("disabled", false); // Mở khóa nút
+              $("#secretCodeDisplay").text(""); // Xóa thông báo
+          } else {
+              let minutes = Math.floor(remainingTime / 60);
+              let seconds = remainingTime % 60;
+          }
+      }, 1000);
+  }
+});
+
+      
+  </script>
+  
+</body>
+</html>
