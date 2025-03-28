@@ -12,7 +12,6 @@ const secretController = {
       const resData = responseSuccess(data, `Tạo mã thành công`, 200);
       res.status(resData.code).json(resData);
     } catch (error) {
-      console.log(error);
       const resData = responseError(error.message, 400);
       res.status(resData.code).json(resData);
     }

@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum TableStatus {
+  AVAILABLE
+  OCCUPIED
+}
+
+enum OrderStatus {
+  PENDING
+  SUBMITTED
+  COMPLETED
+  PAID
+}
+
+enum OrderItemStatus {
+  PREPARING
+  COMPLETED
+}
+
+model Table {
+  id         Int         @id @default(autoincrement())
+  table_name String      @unique
+  status     TableStatus @default(AVAILABLE)
+  created_at DateTime    @default(now())
+  updated_at DateTime    @default(now()) @updatedAt
+
+  orders   Order[]
+  payments Payment[]
+}
+
+model Order {
+  id          Int         @id @default(autoincrement())
+  table_id    Int
+  status      OrderStatus @default(PENDING)
+  total_price Decimal     @default(0.00) @db.Decimal(10, 2)
+  created_at  DateTime    @default(now())
+  updated_at  DateTime    @default(now()) @updatedAt
+
+  table       Table        @relation(fields: [table_id], references: [id])
+  order_items Order_item[]
+  payments    Payment[]
+}
+
+model Order_item {
+  id         Int             @id @default(autoincrement())
+  order_id   Int
+  product_id Int
+  quantity   Int
+  notes      String? // Có thể NULL
+  status     OrderItemStatus @default(PREPARING)
+  created_at DateTime        @default(now())
+  updated_at DateTime        @default(now()) @updatedAt
+
+  order Order @relation(fields: [order_id], references: [id])
+}
+
+model Payment {
+  id           Int       @id @default(autoincrement())
+  order_id     Int
+  table_id     Int
+  total_amount Decimal   @default(0.00) @db.Decimal(10, 2)
+  payment_time DateTime?
+
+  order Order @relation(fields: [order_id], references: [id])
+  table Table @relation(fields: [table_id], references: [id])
+}
