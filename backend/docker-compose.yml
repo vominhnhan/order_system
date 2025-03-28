@@ -1,29 +1,31 @@
 services:
-  mysql:
+  # MySQL cho Auth Service (auth_db)
+  mysql-auth:
     image: mysql:8.0
-    container_name: mysql
+    container_name: mysql-auth
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: 1704
-      MYSQL_DATABASE: restaurant_db
+      MYSQL_DATABASE: auth_db
     ports:
-      - "3307:3306"
+      - "3307:3306" # Host port 3307 ánh xạ tới container port 3306
     volumes:
-      - mysql-data:/var/lib/mysql
+      - mysql-auth-data:/var/lib/mysql
 
-  # redis:
-  #   image: redis:6.0
-  #   container_name: redis-cache
-  #   ports:
-  #     - "6379:6379"
+  # MySQL cho Secret Code Service (secret_code_db)
+  mysql-secret:
+    image: mysql:8.0
+    container_name: mysql-secret
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 1704
+      MYSQL_DATABASE: secret_code_db
+    ports:
+      - "3308:3306" # Host port 3308 ánh xạ tới container port 3306
+    volumes:
+      - mysql-secret-data:/var/lib/mysql
 
-  # rabbitmq:
-  #   image: rabbitmq:3-management
-  #   container_name: rabbitmq
-  #   ports:
-  #     - "5672:5672"
-  #     - "15672:15672"
-
+  # Auth Service
   auth-service:
     build:
       context: ./auth-service
@@ -32,9 +34,23 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - ./auth-service/.env # đường dẫn TƯƠNG ĐỐI từ file docker-compose.yml
+      - ./auth-service/.env
     depends_on:
-      - mysql
+      - mysql-auth
+
+  # Secret Code Service
+  secret-code-service:
+    build:
+      context: ./secret-code-service
+      dockerfile: Dockerfile
+    container_name: secret-code-service
+    ports:
+      - "3005:3005"
+    env_file:
+      - ./secret-code-service/.env
+    depends_on:
+      - mysql-secret
 
 volumes:
-  mysql-data:
+  mysql-auth-data:
+  mysql-secret-data:
