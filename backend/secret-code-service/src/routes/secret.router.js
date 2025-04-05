@@ -1,10 +1,23 @@
 import express from "express";
 import secretController from "../controllers/secret.controller.js";
-import { authMiddleware } from "../middlewares/auth.middleware.js";
+import {
+  authMiddleware,
+  authorizeRoles,
+} from "../middlewares/auth.middleware.js";
 
 const secretRouter = express.Router();
 
-secretRouter.post("/generate", authMiddleware, secretController.generate);
-secretRouter.post("/verify", secretController.verify);
+secretRouter.post(
+  "/generate",
+  authMiddleware,
+  authorizeRoles("manager"),
+  secretController.generate
+);
+secretRouter.post(
+  "/verify",
+  authMiddleware,
+  authorizeRoles("waiter", "manager"),
+  secretController.verify
+);
 
 export default secretRouter;
