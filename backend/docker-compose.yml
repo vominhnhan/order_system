@@ -25,6 +25,21 @@ services:
     volumes:
       - mysql-secret-data:/var/lib/mysql
 
+  # MySQL cho Product Service (product_db)
+  mysql-product:
+    image: mysql:8.0
+    container_name: mysql-product
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 1704
+      MYSQL_DATABASE: product_db
+    ports:
+      - "3310:3306" # Host port 3309 ánh xạ tới container port 3306
+    volumes:
+      - mysql-product-data:/var/lib/mysql
+
+  # ------------------------------------------------------------------------------------
+
   # Auth Service
   auth-service:
     build:
@@ -51,6 +66,22 @@ services:
     depends_on:
       - mysql-secret
 
+  # Product Service
+  product-service:
+    build:
+      context: ./product-service
+      dockerfile: Dockerfile
+    container_name: product-service
+    ports:
+      - "3004:3004"
+    volumes:
+      - ./product-service/images:/home/app/images
+    env_file:
+      - ./product-service/.env
+    depends_on:
+      - mysql-product
+
 volumes:
   mysql-auth-data:
   mysql-secret-data:
+  mysql-product-data:
