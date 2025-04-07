@@ -22,6 +22,19 @@ const waiterController = {
       const resData = responseSuccess(data, `Thêm món thành công`, 201);
       res.status(resData.code).json(resData);
     } catch (error) {
+      console.log(error);
+      const resData = responseError(error.message, 500);
+      res.status(resData.code).json(resData);
+    }
+  },
+
+  sendOrder: async (req, res) => {
+    try {
+      const data = await waiterService.sendOrder(req);
+      const resData = responseSuccess(data, `Gửi đơn hàng thành công`, 201);
+      res.status(resData.code).json(resData);
+    } catch (error) {
+      console.log(error);
       const resData = responseError(error.message, 500);
       res.status(resData.code).json(resData);
     }

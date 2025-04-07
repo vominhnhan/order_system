@@ -14,14 +14,22 @@ export const authMiddleware = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
-    if (decoded.role !== "waiter" && decoded.role !== "manager") {
-      return res.status(403).json({ message: "Không có quyền truy cập" });
-    }
-
     req.user = decoded;
-
     next();
   } catch (error) {
     return res.status(401).json({ message: "Token không hợp lệ" });
   }
+};
+
+// Middleware kiểm tra vai trò
+export const authorizeRoles = (...roles) => {
+  return (req, res, next) => {
+    const userRole = req.user?.role;
+    if (!roles.includes(userRole)) {
+      return res
+        .status(403)
+        .json({ message: "Bạn không có quyền truy cập chức năng này" });
+    }
+    next();
+  };
 };
