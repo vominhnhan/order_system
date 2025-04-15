@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chef Orders - Wave Cafe</title>
+    <link rel="stylesheet" href="fontawesome/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400" rel="stylesheet" />
+    <link rel="stylesheet" href="css/tooplate-wave-cafe.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+  <div class="tm-container">
+    <div class="tm-row">
+      <div class="tm-left">
+        <div class="tm-left-inner">
+          <div class="tm-site-header">
+            <i class="fas fa-coffee fa-3x tm-site-logo"></i>
+            <h1 class="tm-site-name">Wave Cafe - Chef</h1>
+          </div>
+        </div>
+      </div>
+
+      <div class="tm-right">
+        <main class="tm-main">
+          <div class="tm-page-content">
+            <h2 class="tm-text-primary text-center mb-4">Danh sách Order trong bếp</h2>
+            <div class="table-responsive">
+              <table class="table table-striped table-hover">
+                <thead class="thead-dark">
+                  <tr>
+                    <th>Món</th>
+                    <th>Số lượng</th>
+                    <th>Bàn số</th>
+                    <th>Ghi chú</th>
+                    <th>Thời gian</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                  </tr>
+                </thead>
+                <tbody id="orderList">
+                  <!-- Order sẽ được load động ở đây -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+ <!-- Background video -->
+ <div class="tm-video-wrapper">
+    <i id="tm-video-control-button" class="fas fa-pause"></i>
+    <video autoplay muted loop id="tm-video">
+        <source src="video/wave-cafe-video-bg.mp4" type="video/mp4">
+    </video>
+</div>
+  <script>
+    // Demo order static - thay bằng API gọi về sau
+    const demoOrders = [
+      { id: 1, dish: "Pizza Hải Sản", quantity: 2, table: 5, note: "Ít cay", time: "12:30 PM" },
+      { id: 2, dish: "Bún bò Huế", quantity: 1, table: 3, note: "Không hành", time: "12:35 PM" }
+    ];
+
+    function renderOrders(orders) {
+      const tbody = document.getElementById("orderList");
+      tbody.innerHTML = "";
+      orders.forEach(order => {
+        const row = document.createElement("tr");
+        row.id = `order-${order.id}`;
+        row.innerHTML = `
+          <td>${order.dish}</td>
+          <td>${order.quantity}</td>
+          <td>${order.table}</td>
+          <td>${order.note}</td>
+          <td>${order.time}</td>
+          <td><span class="badge badge-warning">Đang làm</span></td>
+          <td>
+            <button class="btn btn-sm btn-success completeOrder" data-id="${order.id}">Hoàn thành</button>
+            <button class="btn btn-sm btn-danger cancelOrder" data-id="${order.id}">Hủy</button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    $(document).ready(function () {
+      renderOrders(demoOrders);
+
+      $(document).on("click", ".completeOrder", function () {
+        const id = $(this).data("id");
+        const row = $(`#order-${id}`);
+        row.find("td:nth-child(6) span")
+          .removeClass("badge-warning")
+          .addClass("badge-success")
+          .text("Hoàn thành");
+        $(this).remove();
+        setTimeout(() => row.fadeOut(300, () => row.remove()), 3000);
+      });
+
+      $(document).on("click", ".cancelOrder", function () {
+        const id = $(this).data("id");
+        $(`#order-${id}`).fadeOut(300, function () {
+          $(this).remove();
+        });
+      });
+    });
+  </script>
+</body>
+</html>

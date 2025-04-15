@@ -19,7 +19,7 @@ productRouter.post(
 productRouter.get(
   "/category",
   authMiddleware,
-  authorizeRoles("manager"),
+  authorizeRoles("manager", "waiter"),
   productController.getAllCategory
 );
 // Cập nhật danh mục
