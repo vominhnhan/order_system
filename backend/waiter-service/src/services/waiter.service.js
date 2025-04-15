@@ -4,198 +4,181 @@ import axios from "axios";
 
 const waiterService = {
   openTable: async (req) => {
-    const { table_id } = req.body;
+    const { table_id, secret_code } = req.body;
+    const token = req.headers.authorization?.split(" ")[1];
 
-    // Kiểm tra xem bàn có tồn tại và đang AVAILABLE
-    const table = await prisma.table.findFirst({
+    // Gọi Secret Code Service để kiểm tra mã code
+    try {
+      const response = await axios.post(
+        "http://localhost:3005/api/secret/verify",
+        { code: secret_code },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Gửi token cùng request
+          },
+        }
+      );
+
+      // In log để debug Secret Code Service response
+      console.log("Secret Code Service response:", response.data);
+
+      // Kiểm tra phản hồi - đảm bảo key metaData được truy cập chính xác
+      if (response.data.status !== "success" || !response.data.metaData) {
+        throw new Error(response.data.message || "Mã code không hợp lệ");
+      }
+    } catch (error) {
+      console.error("Secret Code verification failed:", error.message);
+      throw new Error("Mã code không hợp lệ");
+    }
+
+    // Kiểm tra trạng thái bàn
+    const numericTableId = Number(table_id);
+    const table = await prisma.table.findUnique({
+      where: { id: numericTableId },
+    });
+
+    if (!table) {
+      throw new Error("Table not found");
+    }
+
+    if (table.status === "OCCUPIED") {
+      throw new Error("Table is already occupied");
+    }
+
+    // Thực hiện transaction cập nhật trạng thái bàn và tạo đơn hàng mới
+    const result = await prisma.$transaction(async (tx) => {
+      // Cập nhật trạng thái bàn (chuyển thành OCCUPIED)
+      const updatedTable = await tx.table.update({
+        where: { id: numericTableId },
+        data: { status: "OCCUPIED" },
+      });
+
+      // Tạo đơn hàng mới với order status = "PENDING" và tổng tiền 0
+      const newOrder = await tx.order.create({
+        data: {
+          table_id: numericTableId,
+          status: "PENDING",
+          total_price: 0,
+        },
+      });
+
+      return { table: updatedTable, order: newOrder };
+    });
+
+    return result;
+  },
+
+  getTables: async (req) => {
+    const tables = await prisma.table.findMany({
       where: {
-        id: table_id,
         status: "AVAILABLE",
       },
     });
-    if (!table) {
-      throw new Error("Bàn không có sẵn");
-    }
 
-    // Cập nhật trạng thái của bàn thành OCCUPIED
-    await prisma.table.update({
-      where: {
-        id: table_id,
-      },
-      data: {
-        status: "OCCUPIED",
-      },
-    });
-
-    // Tạo đơn hàng mới cho bàn
-    const order = await prisma.order.create({
-      data: {
-        table_id: table_id,
-        status: "PENDING",
-        total_price: 0,
-      },
-    });
-
-    return { table, order };
-  },
-
-  addOrderItem: async (req) => {
-    const { order_id, product_id, quantity, note } = req.body;
-
-    // Lấy thông tin đơn hàng
-    const order = await prisma.order.findUnique({
-      where: {
-        id: Number(order_id),
-      },
-    });
-    console.log({ order });
-
-    let new_order_id = order_id;
-
-    // Nếu order hiện tại đã SUBMITTED, tìm một đơn hàng PENDING cho cùng table_id
-    if (order.status !== "PENDING") {
-      const pendingOrder = await prisma.order.findFirst({
-        where: {
-          table_id: order.table_id,
-          status: "PENDING",
-        },
-        orderBy: {
-          created_at: "desc", // Lấy đơn hàng mới nhất
-        },
-      });
-
-      // Nếu tìm thấy đơn hàng PENDING, sử dụng order_id của nó
-      if (pendingOrder) {
-        new_order_id = pendingOrder.id; // Cập nhật order_id mới
-        console.log("Dùng đơn hàng đã có:", new_order_id);
-      } else {
-        // Nếu không tìm thấy order PENDING, tạo order mới
-        const newOrder = await prisma.order.create({
-          data: {
-            table_id: order.table_id,
-            status: "PENDING",
-            total_price: 0,
-          },
-        });
-        new_order_id = newOrder.id; // Cập nhật order_id mới
-        console.log("Tạo đơn hàng mới:", new_order_id);
-      }
-    }
-
-    console.log({ new_order_id });
-    // Gọi Product Service để lấy thông tin sản phẩm
-    const productServiceUrl =
-      process.env.PRODUCT_SERVICE_URL || "http://localhost:3004";
-
-    const productResponse = await axios.get(
-      `${productServiceUrl}/api/products/${product_id}`
-    );
-    const product = productResponse.data;
-
-    if (!product || !product.metaData.is_available) {
-      throw new Error("Sản phẩm không tồn tại");
-    }
-
-    // Tạo order_item với trạng thái PENDING
-    const orderItem = await prisma.order_item.create({
-      data: {
-        order_id: Number(new_order_id),
-        product_id: Number(product_id),
-        quantity: Number(quantity),
-        price: product.metaData.price * Number(quantity),
-        notes: note,
-      },
-    });
-
-    // Cập nhật tổng tiền của Order tương ứng
-    await prisma.order.update({
-      where: {
-        id: new_order_id,
-      },
-      data: {
-        total_price: {
-          increment: product.metaData.price * Number(quantity),
-        },
-      },
-    });
-
-    // Gửi sự kiện new_order_created qua RabbitMQ
-    const channel = getChannel();
-    const event = {
-      event: "new_order_created",
-      data: {
-        order_id: new_order_id,
-        order_item_id: orderItem.id,
-        product_id,
-        quantity,
-        price: product.metaData.price * Number(quantity),
-        note,
-      },
-    };
-
-    channel.publish(
-      "order_exchange",
-      "order_created",
-      Buffer.from(JSON.stringify(event))
-    );
-    console.log("Sự kiện new_order_created đã được gửi tới RabbitMQ:", event);
-
-    return { orderItem: orderItem };
+    return tables;
   },
 
   sendOrder: async (req) => {
-    const { order_id } = req.body;
-
-    // Kiểm tra order
+    const { order_id, items } = req.body;
+    const token = req.headers.authorization?.split(" ")[1];
+    // Kiểm tra đơn hàng tồn tại
     const order = await prisma.order.findUnique({
-      where: {
-        id: Number(order_id),
-      },
+      where: { id: Number(order_id) },
     });
-
-    // Cập nhật đơn hàng sang SUBMITTED nếu nó vẫn đang ở trạng thái PENDING
-    if (order.status == "PENDING") {
-      await prisma.order.update({
-        where: {
-          id: Number(order_id),
-        },
-        data: { status: "SUBMITTED" },
-      });
+    if (!order) {
+      throw new Error("Order not found");
     }
 
-    // Cập nhật trạng thái của tất cả các Order_item liên quan từ PENDING sang PREPARING
-    await prisma.order_item.updateMany({
-      where: {
-        order_id: Number(order_id),
-        status: "PENDING",
-      },
-      data: {
-        status: "PREPARING",
-      },
+    // Transaction
+    const updatedOrder = await prisma.$transaction(async (tx) => {
+      let totalPrice = 0;
+
+      for (const item of items) {
+        if (Number(item.quantity) > 0) {
+          // Gọi Product Service để lấy giá
+          const productRes = await axios.get(
+            `http://localhost:3004/api/products/${item.product_id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`, // Gửi token cùng request
+              },
+            }
+          );
+          if (
+            productRes.data.status === "success" &&
+            productRes.data.metaData
+          ) {
+            const productPrice = productRes.data.metaData.price || 0;
+
+            // Tạo order_item với status = PREPARING
+            await tx.order_item.create({
+              data: {
+                order_id: Number(order_id),
+                product_id: Number(item.product_id),
+                quantity: Number(item.quantity),
+                status: "PREPARING",
+                price: productPrice, // Nếu cột 'price' ở order_item có sẵn
+              },
+            });
+
+            totalPrice += productPrice * Number(item.quantity);
+          } else {
+            console.error("Không lấy được giá product_id =", item.product_id);
+          }
+        }
+      }
+
+      // Cập nhật order
+      const newOrder = await tx.order.update({
+        where: { id: Number(order_id) },
+        data: {
+          total_price: totalPrice,
+          status: "SUBMITTED", // hoặc "PENDING" tuỳ nghiệp vụ
+        },
+        include: { order_items: true },
+      });
+
+      return newOrder;
     });
 
-    // Gửi sự kiện order_sent qua RabbitMQ tới Chef Service
-    const channel = getChannel();
-    const event = {
-      event: "order_sent",
-      data: {
-        order_id,
-      },
-    };
-    channel.publish(
-      "order_exchange",
-      "order.submitted",
-      Buffer.from(JSON.stringify(event))
-    );
-    console.log("Sự kiện order_sent đã được gửi tới RabbitMQ:", event);
+    return updatedOrder;
+  },
 
-    const updateOrder = await prisma.order.findUnique({
-      where: {
-        id: Number(order_id),
-      },
-    });
+  // Hàm xử lý cập nhật trạng thái món ăn
+  toggleAvailability: async (req, product_id, is_available) => {
+    try {
+      console.log(
+        "Received request to update product:",
+        product_id,
+        "Availability:",
+        is_available
+      );
 
-    return updateOrder;
+      // Kiểm tra xem sản phẩm có tồn tại không
+      const product = await prisma.product.findUnique({
+        where: { id: product_id },
+      });
+
+      if (!product) {
+        throw new Error("Sản phẩm không tồn tại");
+      }
+
+      // Cập nhật trạng thái is_available
+      await prisma.product.update({
+        where: { id: product_id },
+        data: { is_available: is_available },
+      });
+
+      console.log(
+        `Product ${product_id} availability updated to ${is_available}`
+      );
+
+      // Trả về thông báo thành công
+      return { message: "Trạng thái món ăn đã được cập nhật" };
+    } catch (error) {
+      console.log("Error updating availability:", error.message);
+      throw new Error(error.message);
+    }
   },
 };
 

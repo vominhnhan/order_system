@@ -1,127 +1,171 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Khóa Bàn - Wave Cafe</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+    />
+    <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-      <div id="lockScreen" class="lock-container">
-          <h2 class="tm-text-primary text-center mb-4">🔒 Mở khóa bàn</h2>
-  
-          <div class="form-group">
-              <label for="tableSelect">Chọn bàn:</label>
-              <select id="tableSelect" class="form-control">
-                  <option value="">Chọn số bàn...</option>
-                  <option value="101">Bàn 101</option>
-                  <option value="102">Bàn 102</option>
-                  <option value="103">Bàn 103</option>
-                  <option value="104">Bàn 104</option>
-              </select>
-          </div>
-  
-          <div class="form-group">
-              <label for="secretCodeInput">Nhập Secret Code:</label>
-              <input type="password" id="secretCodeInput" class="form-control" placeholder="Nhập mã xác nhận">
-              <p id="errorMsg" class="text-danger mt-2" style="display: none;">Mã hoặc số bàn không đúng!</p>
-          </div>
-  
-          <button id="unlockTableBtn" class="btn btn-primary btn-block">Mở khóa</button>
-      </div>
-  </body>
-  
-</html>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="lockScreen" class="lock-container">
+      <h2 class="tm-text-primary text-center mb-4">🔒 Mở khóa bàn</h2>
 
-<style>
+      <div class="form-group">
+        <label for="tableSelect">Chọn bàn:</label>
+        <select id="tableSelect" class="form-control">
+          <option value="">Chọn số bàn...</option>
+          <!-- Danh sách bàn sẽ được đổ động từ API -->
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="secretCodeInput">Nhập Secret Code:</label>
+        <input
+          type="password"
+          id="secretCodeInput"
+          class="form-control"
+          placeholder="Nhập mã xác nhận"
+        />
+        <p id="errorMsg" class="text-danger mt-2" style="display: none">
+          Mã hoặc số bàn không đúng!
+        </p>
+      </div>
+
+      <button id="unlockTableBtn" class="btn btn-primary btn-block">
+        Mở khóa
+      </button>
+    </div>
+
+    <style>
       body {
-            font-family: Arial, sans-serif;
-            background: url('img/lockscreen.jpg') no-repeat center center fixed;
-            background-size: cover;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-        }
-        
-        body::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5); /* Tạo hiệu ứng tối */
-            backdrop-filter: blur(5px); /* Làm mờ nền */
-            z-index: 1;
-        }
-        
-        .lock-container {
-            width: 350px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.9); /* Làm mờ form nhập */
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-            text-align: center;
-            position: relative;
-            z-index: 2;
-        }
-        
-        .tm-container {
-            max-width: 800px;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-        }
-        
-        .tm-site-header {
-            text-align: center;
-            padding: 20px;
-        }
-        
-        .tm-site-nav {
-            background: #007bff;
-            padding: 10px;
-        }
-        
-        .tm-site-nav-ul {
-            list-style: none;
-            padding: 0;
-            display: flex;
-            justify-content: space-around;
-        }
-        
-        .tm-site-nav-ul li a {
-            color: white;
-            text-decoration: none;
-        }
-        
-        .tm-text-primary {
-            color: #007bff;
-        }
-        
-</style>
-<script>
+        font-family: Arial, sans-serif;
+        background: url("img/lockscreen.jpg") no-repeat center center fixed;
+        background-size: cover;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+      }
+      body::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
+        z-index: 1;
+      }
+      .lock-container {
+        width: 350px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        position: relative;
+        z-index: 2;
+      }
+      .tm-text-primary {
+        color: #007bff;
+      }
+    </style>
+
+    <script>
       $(document).ready(function () {
-            const correctSecretCode = "1234"; // Mã xác nhận tạm thời
-        
-            $("#unlockTableBtn").click(function () {
-                let selectedTable = $("#tableSelect").val();
-                let secretCode = $("#secretCodeInput").val();
-        
-                if (selectedTable !== "" && secretCode === correctSecretCode) {
-                    sessionStorage.setItem("tableNumber", selectedTable); // Lưu số bàn vào session
-                    window.location.href = "index.html"; // Chuyển hướng sang index.html
-                } else {
-                    $("#errorMsg").show();
-                }
-            });
+        loadTables(); // Load danh sách bàn khi trang load
+
+        $("#unlockTableBtn").click(function () {
+          let selectedTable = $("#tableSelect").val();
+          let secretCode = $("#secretCodeInput").val();
+
+          if (!selectedTable || !secretCode) {
+            $("#errorMsg")
+              .text("Vui lòng chọn bàn và nhập mã xác nhận!")
+              .show();
+            return;
+          }
+
+          // Gửi request POST đến API /api/table/open với table_id và secret_code
+          $.ajax({
+            url: "http://localhost:3002/api/table/open",
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+            data: JSON.stringify({
+              table_id: selectedTable,
+              secret_code: secretCode,
+            }),
+            success: function (response) {
+              console.log("Open table response:", response);
+              if (response.status === "success") {
+                // Lưu table id và order id vào sessionStorage
+                sessionStorage.setItem("tableNumber", selectedTable);
+                // Dựa theo cấu trúc trả về, nếu server trả về key "metaData.order.id"
+                sessionStorage.setItem("order_id", response.metaData.order.id);
+                // Chuyển hướng sang trang waiter (ví dụ: waiter.html hoặc index.html)
+                window.location.href = "waiter.html";
+              } else {
+                $("#errorMsg")
+                  .text(response.message || "Mã hoặc số bàn không đúng!")
+                  .show();
+              }
+            },
+            error: function (err) {
+              console.error("Lỗi mở khóa bàn:", err);
+              $("#errorMsg").text("Có lỗi xảy ra, vui lòng thử lại!").show();
+            },
+          });
         });
-        
-        
-</script>
+      });
+
+      // Hàm loadTables(): gọi API GET /api/tables và đổ danh sách bàn vào <select>
+      function loadTables() {
+        $.ajax({
+          url: "http://localhost:3002/api/tables",
+          method: "GET",
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+          success: function (response) {
+            console.log("Tables response:", response);
+            if (response.status === "success") {
+              // Sử dụng key phù hợp: nếu server trả về "metadata", dùng response.metadata
+              const tables = response.metaData || response.data;
+              const $tableSelect = $("#tableSelect");
+              $tableSelect.empty();
+              $tableSelect.append('<option value="">Chọn số bàn...</option>');
+              tables.forEach(function (table) {
+                // Nếu cần lọc theo trạng thái AVAILABLE
+                if (table.status === "AVAILABLE") {
+                  $tableSelect.append(`
+                    <option value="${table.id}">
+                      ${table.table_name}
+                    </option>
+                  `);
+                }
+              });
+            } else {
+              console.error("Không thể load bàn:", response.message);
+            }
+          },
+          error: function (err) {
+            console.error("Lỗi AJAX load tables:", err);
+          },
+        });
+      }
+    </script>
+  </body>
+</html>

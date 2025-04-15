@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Form</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #e6f0fa;
+        font-family: Arial, sans-serif;
+      }
+
+      .login-container {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 300px;
+        text-align: center;
+      }
+
+      .login-container h2 {
+        margin-bottom: 20px;
+        font-size: 24px;
+        color: #333;
+      }
+
+      .input-group {
+        margin-bottom: 15px;
+        text-align: left;
+      }
+
+      .input-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-size: 14px;
+        color: #666;
+      }
+
+      .input-group input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+        box-sizing: border-box;
+      }
+
+      .login-btn {
+        background-color: #87ceeb;
+        color: white;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        width: 100%;
+        font-size: 16px;
+        cursor: pointer;
+      }
+
+      .login-btn:hover {
+        background-color: #72bcd4;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <h2>LOGIN TO SYSTEM</h2>
+      <form>
+        <div class="input-group">
+          <label for="username">Username</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            placeholder="Enter your username"
+          />
+        </div>
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Enter your password"
+          />
+        </div>
+        <button type="submit" class="login-btn">LOGIN</button>
+      </form>
+    </div>
+
+    <script>
+      document.querySelector("form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const username = document.querySelector("#username").value.trim();
+        const password = document.querySelector("#password").value.trim();
+
+        if (!username || !password) {
+          alert("Vui lòng nhập đủ thông tin.");
+          return;
+        }
+
+        try {
+          const response = await fetch("http://localhost:3000/api/auth/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ username, password }),
+          });
+          const result = await response.json();
+
+          if (result.status === "success") {
+            const token = result.metaData;
+
+            // 🧠 Giải mã phần payload của token để lấy vai trò
+            const payloadBase64 = token.split(".")[1];
+            const payloadJson = atob(payloadBase64);
+            const payload = JSON.parse(payloadJson);
+            const role = payload.role;
+            // 🗂️ Lưu token và role
+            localStorage.setItem("token", token);
+            localStorage.setItem("role", role);
+
+            // 🔀 Chuyển trang theo vai trò
+            if (role === "waiter") {
+              window.location.href = "lock.html";
+            } else if (role === "chef") {
+              window.location.href = "chef.html";
+            } else if (role === "manager") {
+              window.location.href = "manager.html";
+            } else {
+              alert("Vai trò không xác định!");
+            }
+          } else {
+            alert(result.message || "Đăng nhập thất bại");
+          }
+        } catch (error) {
+          alert("Lỗi kết nối tới server!");
+        }
+      });
+    </script>
+  </body>
+</html>

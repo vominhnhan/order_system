@@ -15,6 +15,7 @@ CREATE TABLE `Product` (
     `name` VARCHAR(191) NOT NULL,
     `description` VARCHAR(191) NULL,
     `price` DOUBLE NOT NULL,
+    `imageUrl` VARCHAR(191) NULL,
     `is_available` BOOLEAN NOT NULL DEFAULT true,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),

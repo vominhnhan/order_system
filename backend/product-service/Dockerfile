@@ -1,5 +1,5 @@
 # Sử dụng image Node.js chính thức
-FROM node:23
+FROM node:22.3.0
 
 # Thiết lập thư mục làm việc trong container
 WORKDIR /home/app

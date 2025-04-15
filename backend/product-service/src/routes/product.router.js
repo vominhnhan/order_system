@@ -19,7 +19,6 @@ productRouter.post(
 productRouter.get(
   "/category",
   authMiddleware,
-  authorizeRoles("manager"),
   productController.getAllCategory
 );
 // Cập nhật danh mục
@@ -39,7 +38,11 @@ productRouter.post(
   productController.addProduct
 );
 // Lấy 1 sản phẩm theo id
-productRouter.get("/products/:id", productController.getProductById);
+productRouter.get(
+  "/products/:id",
+  authMiddleware,
+  productController.getProductById
+);
 // Lấy tất cả sản phẩm theo danh mục
 productRouter.get(
   "/products/category/:id",

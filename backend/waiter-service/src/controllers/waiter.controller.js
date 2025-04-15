@@ -16,10 +16,14 @@ const waiterController = {
     }
   },
 
-  addOrderItem: async (req, res) => {
+  getTables: async (req, res) => {
     try {
-      const data = await waiterService.addOrderItem(req);
-      const resData = responseSuccess(data, `Thêm món thành công`, 201);
+      const data = await waiterService.getTables();
+      const resData = responseSuccess(
+        data,
+        `Lấy danh sách bàn thành công`,
+        201
+      );
       res.status(resData.code).json(resData);
     } catch (error) {
       console.log(error);
@@ -35,6 +39,26 @@ const waiterController = {
       res.status(resData.code).json(resData);
     } catch (error) {
       console.log(error);
+      const resData = responseError(error.message, 500);
+      res.status(resData.code).json(resData);
+    }
+  },
+
+  toggleAvailability: async (req, res) => {
+    const { product_id, is_available } = req.body;
+    try {
+      const data = await waiterService.toggleAvailability(
+        req,
+        product_id,
+        is_available
+      );
+      const resData = responseSuccess(
+        data,
+        `Cập nhật trạng thái món ăn thành công`,
+        200
+      );
+      res.status(resData.code).json(resData);
+    } catch (error) {
       const resData = responseError(error.message, 500);
       res.status(resData.code).json(resData);
     }
