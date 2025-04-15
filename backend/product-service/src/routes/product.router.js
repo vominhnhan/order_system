@@ -45,6 +45,9 @@ productRouter.get(
   "/products/category/:id",
   productController.getProductsByCategory
 );
+productRouter.get("/products", 
+  productController.getAllProducts);
+
 // Cập nhật sản phẩm
 productRouter.patch(
   "/products/:id",

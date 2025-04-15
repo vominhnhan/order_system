@@ -20,20 +20,84 @@
             <i class="fas fa-user-cog fa-3x tm-site-logo"></i>
             <h1 class="tm-site-name">Manager Panel</h1>
           </div>
+          <nav class="tm-site-nav">
+            <ul class="tm-site-nav-ul">
+              <li class="tm-page-nav-item">
+                <a href="#categories" class="tm-page-link active">
+                  <i class="fas fa-list tm-page-link-icon"></i>
+                  <span>Categories</span>
+                </a>
+              </li>
+              <li class="tm-page-nav-item">
+                <a href="#products" class="tm-page-link">
+                  <i class="fas fa-coffee tm-page-link-icon"></i>
+                  <span>Products</span>
+                </a>
+              </li>
+              <li class="tm-page-nav-item">
+                <a href="#bills" class="tm-page-link">
+                  <i class="fas fa-receipt tm-page-link-icon"></i>
+                  <span>Bills</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
         </div>
       </div>
       <div class="tm-right">
         <main class="tm-main">
-          <div class="tm-page-content">
-            <h2 class="tm-text-primary text-center mb-4">Quản lý hóa đơn</h2>
+          <!-- Categories Section -->
+          <div id="categories" class="tm-page-content">
+            <h2 class="tm-text-primary text-center mb-4">Quản lý danh mục</h2>
+            <div class="d-flex justify-content-between mb-3">
+              <button id="addCategoryBtn" class="btn btn-primary" data-toggle="modal" data-target="#categoryModal">Thêm danh mục</button>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-striped table-hover">
+                <thead class="thead-dark">
+                  <tr>
+                    <th>ID</th>
+                    <th>Tên danh mục</th>
+                    <th>Thời gian tạo</th>
+                    <th>Thời gian cập nhật</th>
+                    <th>Hành động</th>
+                  </tr>
+                </thead>
+                <tbody id="categoryList"></tbody>
+              </table>
+            </div>
+          </div>
 
-            <!-- Secret Code -->
+          <!-- Products Section -->
+          <div id="products" class="tm-page-content" style="display: none;">
+            <h2 class="tm-text-primary text-center mb-4">Quản lý sản phẩm</h2>
+            <div class="d-flex justify-content-between mb-3">
+              <button id="addProductBtn" class="btn btn-primary" data-toggle="modal" data-target="#productModal">Thêm sản phẩm</button>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-striped table-hover">
+                <thead class="thead-dark">
+                  <tr>
+                    <th>ID</th>
+                    <th>Tên sản phẩm</th>
+                    <th>Danh mục</th>
+                    <th>Giá</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                  </tr>
+                </thead>
+                <tbody id="productList"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Bills Section -->
+          <div id="bills" class="tm-page-content" style="display: none;">
+            <h2 class="tm-text-primary text-center mb-4">Quản lý hóa đơn</h2>
             <div class="d-flex justify-content-between mb-3">
               <button id="generateSecretCode" class="btn btn-danger">Generate Secret Code</button>
               <span id="secretCodeDisplay" class="font-weight-bold text-danger" style="font-size: 20px;"></span>
             </div>
-
-            <!-- Danh sách hóa đơn -->
             <div class="table-responsive">
               <table class="table table-striped table-hover">
                 <thead class="thead-dark">
@@ -46,9 +110,7 @@
                     <th>Hành động</th>
                   </tr>
                 </thead>
-                <tbody id="orderManagerList">
-                  <!-- Hóa đơn sẽ hiển thị tại đây -->
-                </tbody>
+                <tbody id="orderManagerList"></tbody>
               </table>
             </div>
           </div>
@@ -56,33 +118,477 @@
       </div>
     </div>
   </div>
- <!-- Background video -->
- <div class="tm-video-wrapper">
+
+  <!-- Modal for Adding/Editing Category -->
+  <div class="modal fade" id="categoryModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="categoryModalLabel">Thêm danh mục</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="categoryForm">
+            <input type="hidden" id="categoryId">
+            <div class="form-group">
+              <label for="categoryName">Tên danh mục</label>
+              <input type="text" class="form-control" id="categoryName" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Lưu</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for Adding/Editing Product -->
+  <div class="modal fade" id="productModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="productModalLabel">Thêm sản phẩm</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="productForm" enctype="multipart/form-data">
+            <input type="hidden" id="productId">
+            <div class="form-group">
+              <label for="productCategory">Danh mục</label>
+              <select class="form-control" id="productCategory" required>
+                <!-- Categories will be loaded dynamically -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="productName">Tên sản phẩm</label>
+              <input type="text" class="form-control" id="productName" required>
+            </div>
+            <div class="form-group">
+              <label for="productDescription">Mô tả</label>
+              <textarea class="form-control" id="productDescription"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="productPrice">Giá</label>
+              <input type="number" class="form-control" id="productPrice" step="0.01" required>
+            </div>
+            <div class="form-group">
+              <label for="productImage">Hình ảnh</label>
+              <input type="file" class="form-control-file" id="productImage" accept="image/*">
+            </div>
+            <button type="submit" class="btn btn-primary">Lưu</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tm-video-wrapper">
     <i id="tm-video-control-button" class="fas fa-pause"></i>
     <video autoplay muted loop id="tm-video">
-        <source src="video/wave-cafe-video-bg.mp4" type="video/mp4">
+      <source src="video/wave-cafe-video-bg.mp4" type="video/mp4">
     </video>
-</div>
+  </div>
+
   <script>
+    const token = localStorage.getItem("token") || "mock-token"; // Fallback for demo
+
+    // Video background control
+    function setVideoSize() {
+      const vidWidth = 1920;
+      const vidHeight = 1080;
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+      const tempVidWidth = windowHeight * vidWidth / vidHeight;
+      const tempVidHeight = windowWidth * vidHeight / vidWidth;
+      const newVidWidth = tempVidWidth > windowWidth ? tempVidWidth : windowWidth;
+      const newVidHeight = tempVidHeight > windowHeight ? tempVidHeight : windowHeight;
+      const tmVideo = $('#tm-video');
+      tmVideo.css('width', newVidWidth);
+      tmVideo.css('height', newVidHeight);
+    }
+
+    function initPage() {
+      let pageId = location.hash;
+      if (pageId) {
+        highlightMenu($(`.tm-page-link[href^="${pageId}"]`)); 
+        showPage($(pageId));
+      } else {
+        pageId = $('.tm-page-link.active').attr('href');
+        showPage($(pageId));
+      }
+    }
+
+    function highlightMenu(menuItem) {
+      $('.tm-page-link').removeClass('active');
+      menuItem.addClass('active');
+    }
+
+    function showPage(page) {
+      $('.tm-page-content').hide();
+      page.show();
+    }
+
     $(document).ready(function () {
-      $(".deleteBill").click(function () {
-        let billId = $(this).data("id");
-        $("#bill-" + billId).fadeOut(300, function () {
-          $(this).remove();
-        });
+      // Initial page setup
+      initPage();
+      $('.tm-page-link').click(function(event) {
+        if (window.innerWidth > 991) {
+          event.preventDefault();
+        }
+        highlightMenu($(event.currentTarget));
+        showPage($(event.currentTarget.hash));
       });
 
-      let lastGeneratedTime = 0;
-      const cooldownTime = 10 * 60 * 1000;
+      setVideoSize();
+      let timeout;
+      window.onresize = function() {
+        clearTimeout(timeout);
+        timeout = setTimeout(setVideoSize, 100);
+      };
 
-      $("#generateSecretCode").click(function () {
+      const btn = $("#tm-video-control-button");
+      btn.on("click", function() {
+        const video = document.getElementById("tm-video");
+        $(this).removeClass();
+        if (video.paused) {
+          video.play();
+          $(this).addClass("fas fa-pause");
+        } else {
+          video.pause();
+          $(this).addClass("fas fa-play");
+        }
+      });
+
+      // Load initial data
+      loadCategories();
+      loadProducts();
+      loadPaidBills();
+
+      // Load categories into product modal dropdown
+      async function loadCategoryDropdown() {
+        try {
+          const res = await fetch("http://localhost:3004/api/category", {
+            headers: { Authorization: "Bearer " + token },
+          });
+          const data = await res.json();
+          if (data.status === "success") {
+            const dropdown = $("#productCategory");
+            dropdown.empty();
+            data.metaData.forEach(cat => {
+              dropdown.append(`<option value="${cat.id}">${cat.name}</option>`);
+            });
+          }
+        } catch (error) {
+          console.error("Error loading categories for dropdown:", error);
+        }
+      }
+
+      // Categories Management
+      async function loadCategories() {
+        try {
+          const res = await fetch("http://localhost:3004/api/category", {
+            headers: { Authorization: "Bearer " + token },
+          });
+          const data = await res.json();
+          const list = $("#categoryList");
+          list.empty();
+          if (data.status === "success") {
+            data.metaData.forEach(cat => {
+              list.append(`
+                <tr id="category-${cat.id}">
+                  <td>${cat.id}</td>
+                  <td>${cat.name}</td>
+                  <td>${new Date(cat.created_at).toLocaleString()}</td>
+                  <td>${new Date(cat.updated_at).toLocaleString()}</td>
+                  <td>
+                    <button class="btn btn-sm btn-primary editCategory" data-id="${cat.id}" data-name="${cat.name}">Sửa</button>
+                    <button class="btn btn-sm btn-danger deleteCategory" data-id="${cat.id}">Xóa</button>
+                  </td>
+                </tr>
+              `);
+            });
+          } else {
+            list.append('<tr><td colspan="5">Không có danh mục nào.</td></tr>');
+          }
+        } catch (error) {
+          $("#categoryList").html('<tr><td colspan="5">Lỗi tải danh mục.</td></tr>');
+        }
+      }
+
+      // Add/Edit Category
+      $("#categoryForm").submit(async function(e) {
+        e.preventDefault();
+        const id = $("#categoryId").val();
+        const name = $("#categoryName").val();
+        const method = id ? "PATCH" : "POST";
+        const url = id ? `http://localhost:3004/api/category/${id}` : "http://localhost:3004/api/category";
+
+        try {
+          const res = await fetch(url, {
+            method: method,
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + token,
+            },
+            body: JSON.stringify({ name }),
+          });
+          const data = await res.json();
+          if (data.status === "success") {
+            $("#categoryModal").modal("hide");
+            loadCategories();
+            loadCategoryDropdown();
+            alert(id ? "Cập nhật danh mục thành công!" : "Thêm danh mục thành công!");
+          } else {
+            alert(data.message || "Lỗi khi lưu danh mục");
+          }
+        } catch (error) {
+          alert("Lỗi hệ thống, vui lòng thử lại.");
+        }
+      });
+
+      $(document).on("click", ".editCategory", function() {
+        const id = $(this).data("id");
+        const name = $(this).data("name");
+        $("#categoryId").val(id);
+        $("#categoryName").val(name);
+        $("#categoryModalLabel").text("Sửa danh mục");
+        $("#categoryModal").modal("show");
+      });
+
+      $(document).on("click", ".deleteCategory", async function() {
+        if (!confirm("Bạn có chắc muốn xóa danh mục này?")) return;
+        const id = $(this).data("id");
+        try {
+          const res = await fetch(`http://localhost:3004/api/category/${id}`, {
+            method: "DELETE",
+            headers: { Authorization: "Bearer " + token },
+          });
+          const data = await res.json();
+          if (data.status === "success") {
+            $(`#category-${id}`).fadeOut(300, () => $(this).remove());
+            loadCategoryDropdown();
+          } else {
+            alert("Lỗi khi xóa danh mục");
+          }
+        } catch (error) {
+          alert("Lỗi hệ thống, vui lòng thử lại.");
+        }
+      });
+
+      $("#addCategoryBtn").click(function() {
+        $("#categoryForm")[0].reset();
+        $("#categoryId").val("");
+        $("#categoryModalLabel").text("Thêm danh mục");
+      });
+
+      // Products Management
+      async function loadProducts() {
+        try {
+          const res = await fetch("http://localhost:3004/api/category", {
+            headers: { Authorization: "Bearer " + token },
+          });
+          const catData = await res.json();
+          const categories = catData.status === "success" ? catData.metaData : [];
+
+          const productList = $("#productList");
+          productList.empty();
+
+          for (const cat of categories) {
+            const prodRes = await fetch(`http://localhost:3004/api/products/category/${cat.id}`);
+            const prodData = await prodRes.json();
+            if (prodData.status === "success") {
+              prodData.metaData.forEach(product => {
+                productList.append(`
+                  <tr id="product-${product.id}">
+                    <td>${product.id}</td>
+                    <td>${product.name}</td>
+                    <td>${cat.name}</td>
+                    <td>$${product.price.toFixed(2)}</td>
+                    <td>
+                      <span class="badge ${product.is_available ? 'badge-success' : 'badge-danger'}">
+                        ${product.is_available ? 'Còn món' : 'Hết món'}
+                      </span>
+                    </td>
+                    <td>
+                      <button class="btn btn-sm btn-primary editProduct" data-id="${product.id}" data-category-id="${product.category_id}" data-name="${product.name}" data-description="${product.description || ''}" data-price="${product.price}">Sửa</button>
+                      <button class="btn btn-sm btn-danger deleteProduct" data-id="${product.id}">Xóa</button>
+                      <button class="btn btn-sm ${product.is_available ? 'btn-danger' : 'btn-success'} toggleAvailability" data-id="${product.id}">
+                        ${product.is_available ? 'Hết món' : 'Còn món'}
+                      </button>
+                    </td>
+                  </tr>
+                `);
+              });
+            }
+          }
+
+          if (!productList.children().length) {
+            productList.append('<tr><td colspan="6">Không có sản phẩm nào.</td></tr>');
+          }
+        } catch (error) {
+          $("#productList").html('<tr><td colspan="6">Lỗi tải sản phẩm.</td></tr>');
+        }
+      }
+
+      // Add/Edit Product
+      $("#productForm").submit(async function(e) {
+        e.preventDefault();
+        const id = $("#productId").val();
+        const category_id = $("#productCategory").val();
+        const name = $("#productName").val();
+        const description = $("#productDescription").val();
+        const price = parseFloat($("#productPrice").val());
+        const image = $("#productImage")[0].files[0];
+
+        const formData = new FormData();
+        formData.append("category_id", category_id);
+        formData.append("name", name);
+        formData.append("description", description);
+        formData.append("price", price);
+        if (image) formData.append("image", image);
+
+        const method = id ? "PATCH" : "POST";
+        const url = id ? `http://localhost:3004/api/products/${id}` : "http://localhost:3004/api/products";
+
+        try {
+          const res = await fetch(url, {
+            method: method,
+            headers: { Authorization: "Bearer " + token },
+            body: formData,
+          });
+          const data = await res.json();
+          if (data.status === "success") {
+            $("#productModal").modal("hide");
+            loadProducts();
+            alert(id ? "Cập nhật sản phẩm thành công!" : "Thêm sản phẩm thành công!");
+          } else {
+            alert(data.message || "Lỗi khi lưu sản phẩm");
+          }
+        } catch (error) {
+          alert("Lỗi hệ thống, vui lòng thử lại.");
+        }
+      });
+
+      $(document).on("click", ".editProduct", function() {
+        const id = $(this).data("id");
+        const categoryId = $(this).data("category-id");
+        const name = $(this).data("name");
+        const description = $(this).data("description");
+        const price = $(this).data("price");
+        $("#productId").val(id);
+        $("#productCategory").val(categoryId);
+        $("#productName").val(name);
+        $("#productDescription").val(description);
+        $("#productPrice").val(price);
+        $("#productModalLabel").text("Sửa sản phẩm");
+        $("#productModal").modal("show");
+      });
+
+      $(document).on("click", ".deleteProduct", async function() {
+        if (!confirm("Bạn có chắc muốn xóa sản phẩm này?")) return;
+        const id = $(this).data("id");
+        try {
+          const res = await fetch(`http://localhost:3004/api/products/${id}`, {
+            method: "DELETE",
+            headers: { Authorization: "Bearer " + token },
+          });
+          const data = await res.json();
+          if (data.status === "success") {
+            $(`#product-${id}`).fadeOut(300, () => $(this).remove());
+          } else {
+            alert("Lỗi khi xóa sản phẩm");
+          }
+        } catch (error) {
+          alert("Lỗi hệ thống, vui lòng thử lại.");
+        }
+      });
+
+      $(document).on("click", ".toggleAvailability", async function() {
+        const id = $(this).data("id");
+        try {
+          const res = await fetch(`http://localhost:3004/api/products/${id}/availability`, {
+            method: "PATCH",
+            headers: { Authorization: "Bearer " + token },
+          });
+          const data = await res.json();
+          if (data.status === "success") {
+            loadProducts();
+          } else {
+            alert("Lỗi khi thay đổi trạng thái sản phẩm");
+          }
+        } catch (error) {
+          alert("Lỗi hệ thống, vui lòng thử lại.");
+        }
+      });
+
+      $("#addProductBtn").click(function() {
+        $("#productForm")[0].reset();
+        $("#productId").val("");
+        $("#productModalLabel").text("Thêm sản phẩm");
+        loadCategoryDropdown();
+      });
+
+      // Bills Management
+      let lastGeneratedTime = 0;
+      const cooldownTime = 10 * 60 * 1000; // 10 minutes
+
+      async function loadPaidBills() {
+        try {
+          const res = await fetch("http://localhost:3002/api/orders?status=paid", {
+            headers: { Authorization: "Bearer " + token },
+          });
+          const data = await res.json();
+          const list = $("#orderManagerList");
+          list.empty();
+          if (data.status === "success") {
+            data.metaData.forEach(bill => {
+              list.append(`
+                <tr id="bill-${bill.id}">
+                  <td>${bill.id}</td>
+                  <td>${bill.table_id}</td>
+                  <td>${bill.items.map(i => i.name).join(", ")}</td>
+                  <td>$${bill.total.toFixed(2)}</td>
+                  <td>${bill.open_time} → ${bill.paid_time}</td>
+                  <td>
+                    <button class="btn btn-sm btn-danger deleteBill" data-id="${bill.id}">Xóa</button>
+                  </td>
+                </tr>
+              `);
+            });
+          } else {
+            list.append('<tr><td colspan="6">Không có hóa đơn nào.</td></tr>');
+          }
+        } catch (error) {
+          $("#orderManagerList").html('<tr><td colspan="6">Lỗi tải hóa đơn.</td></tr>');
+        }
+      }
+
+      $("#generateSecretCode").click(async function() {
         let currentTime = new Date().getTime();
         if (currentTime - lastGeneratedTime >= cooldownTime) {
-          let secretCode = Math.floor(1000 + Math.random() * 9000);
-          $("#secretCodeDisplay").text("Secret Code: " + secretCode);
-          lastGeneratedTime = currentTime;
-          $(this).prop("disabled", true);
-          startCooldownTimer();
+          try {
+            const res = await fetch("http://localhost:3005/api/secret/generate", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token,
+              },
+            });
+            const data = await res.json();
+            if (data.status === "success") {
+              $("#secretCodeDisplay").text("Secret Code: " + data.metaData.code);
+              lastGeneratedTime = currentTime;
+              $(this).prop("disabled", true);
+              startCooldownTimer();
+            } else {
+              $("#secretCodeDisplay").text("Lỗi tạo mã!");
+            }
+          } catch (error) {
+            $("#secretCodeDisplay").text("Lỗi hệ thống, vui lòng thử lại.");
+          }
         } else {
           let remainingTime = Math.ceil((cooldownTime - (currentTime - lastGeneratedTime)) / 1000);
           let minutes = Math.floor(remainingTime / 60);
@@ -92,10 +598,9 @@
       });
 
       function startCooldownTimer() {
-        let interval = setInterval(function () {
+        let interval = setInterval(function() {
           let currentTime = new Date().getTime();
           let remainingTime = Math.ceil((cooldownTime - (currentTime - lastGeneratedTime)) / 1000);
-
           if (remainingTime <= 0) {
             clearInterval(interval);
             $("#generateSecretCode").prop("disabled", false);
@@ -103,6 +608,24 @@
           }
         }, 1000);
       }
+
+      $(document).on("click", ".deleteBill", async function() {
+        const billId = $(this).data("id");
+        try {
+          const res = await fetch(`http://localhost:3002/api/orders/${billId}`, {
+            method: "DELETE",
+            headers: { Authorization: "Bearer " + token },
+          });
+          const data = await res.json();
+          if (data.status === "success") {
+            $(`#bill-${billId}`).fadeOut(300, () => $(this).remove());
+          } else {
+            alert("Lỗi khi xóa hóa đơn");
+          }
+        } catch (error) {
+          alert("Lỗi hệ thống, vui lòng thử lại.");
+        }
+      });
     });
   </script>
 </body>

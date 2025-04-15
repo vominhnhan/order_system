@@ -82,28 +82,71 @@
 let currentOrderId = null;
 let selectedTableId = 1;
 const categoryTabMap = {};
+const token = localStorage.getItem("token") || "mock-token"; // Fallback for demo
 
-// Hiện modal mã xác thực khi vào trang
+// Video size adjustment
+function setVideoSize() {
+  const vidWidth = 1920;
+  const vidHeight = 1080;
+  const windowWidth = window.innerWidth;
+  const windowHeight = window.innerHeight;
+  const tempVidWidth = windowHeight * vidWidth / vidHeight;
+  const tempVidHeight = windowWidth * vidHeight / vidWidth;
+  const newVidWidth = tempVidWidth > windowWidth ? tempVidWidth : windowWidth;
+  const newVidHeight = tempVidHeight > windowHeight ? tempVidHeight : windowHeight;
+  const tmVideo = $('#tm-video');
+  tmVideo.css('width', newVidWidth);
+  tmVideo.css('height', newVidHeight);
+}
+
+// Page load
 document.addEventListener("DOMContentLoaded", () => {
-  $('#secretCodeModal').modal({ backdrop: 'static', keyboard: false });
+  const role = localStorage.getItem("role");
+  const verified = localStorage.getItem("verifiedCode");
+  const tableNumber = sessionStorage.getItem("tableNumber");
+
+  if (!token || role !== "waiter" || verified !== "true" || !tableNumber) {
+    return window.location.href = "lock.html";
+  }
+
+  selectedTableId = parseInt(tableNumber);
   $('#secretCodeModal').modal('show');
+  setVideoSize();
+
+  const btn = $("#tm-video-control-button");
+  btn.on("click", function() {
+    const video = document.getElementById("tm-video");
+    $(this).removeClass();
+    if (video.paused) {
+      video.play();
+      $(this).addClass("fas fa-pause");
+    } else {
+      video.pause();
+      $(this).addClass("fas fa-play");
+    }
+  });
+
+  let timeout;
+  window.onresize = function() {
+    clearTimeout(timeout);
+    timeout = setTimeout(setVideoSize, 100);
+  };
 });
 
 document.getElementById("verifySecretCode").addEventListener("click", async () => {
   const code = document.getElementById("secretCodeInput").value;
-
   try {
     const res = await fetch("http://localhost:3005/api/secret/verify", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
+        Authorization: "Bearer " + token,
       },
       body: JSON.stringify({ code }),
     });
-
     const data = await res.json();
     if (data.status === "success" && data.metaData === true) {
+      localStorage.setItem("verifiedCode", "true");
       $('#secretCodeModal').modal('hide');
       await loadCategories();
     } else {
@@ -118,12 +161,10 @@ async function loadCategories() {
   try {
     const res = await fetch("http://localhost:3004/api/category", {
       headers: {
-        Authorization: "Bearer " + localStorage.getItem("token"),
+        Authorization: "Bearer " + token,
       },
     });
-
     const data = await res.json();
-
     if (data.status === "success") {
       const seenNames = new Set();
       const uniqueCategories = data.metaData.filter(cat => {
@@ -134,6 +175,8 @@ async function loadCategories() {
 
       const tabs = document.getElementById("categoryTabs");
       const contents = document.getElementById("drinkTabContents");
+      tabs.innerHTML = "";
+      contents.innerHTML = "";
 
       for (let i = 0; i < uniqueCategories.length; i++) {
         const cat = uniqueCategories[i];
@@ -162,9 +205,11 @@ async function loadCategories() {
         $(".tm-tab-link").removeClass("active");
         $(this).addClass("active");
       });
+    } else {
+      $("#categoryTabs").html('<li><span>Lỗi tải danh mục</span></li>');
     }
   } catch (err) {
-    console.error("Lỗi khi tải danh mục:", err);
+    $("#categoryTabs").html('<li><span>Lỗi tải danh mục</span></li>');
   }
 }
 
@@ -174,22 +219,26 @@ async function loadProductsByCategory(categoryId, tabId) {
     const data = await res.json();
     if (data.status === "success") {
       const container = document.querySelector(`#${tabId} .tm-list`);
+      container.innerHTML = "";
       for (const p of data.metaData) {
         const item = document.createElement("div");
-        item.className = "tm-list-item";
+        item.className = `tm-list-item ${p.is_available ? '' : 'out-of-stock'}`;
+        item.id = `item-${p.id}`;
         item.innerHTML = `
           <img src="images/${p.imageUrl}" class="tm-list-item-img" alt="${p.name}">
           <div class="tm-black-bg tm-list-item-text">
-            <h3 class="tm-list-item-name">${p.name}<span class="tm-list-item-price">$${p.price}</span></h3>
-            <p class="tm-list-item-description">${p.description}</p>
+            <h3 class="tm-list-item-name">${p.name}<span class="tm-list-item-price">$${p.price.toFixed(2)}</span></h3>
+            <p class="tm-list-item-description">${p.description || 'Không có mô tả'}</p>
             <button class="btn btn-sm btn-primary" onclick="addToOrder(${p.id}, '${p.name}', ${p.price})">+</button>
           </div>
         `;
         container.appendChild(item);
       }
+    } else {
+      $(`#${tabId} .tm-list`).html('<p>Lỗi tải sản phẩm</p>');
     }
   } catch (err) {
-    console.error("Lỗi khi load sản phẩm:", err);
+    $(`#${tabId} .tm-list`).html('<p>Lỗi tải sản phẩm</p>');
   }
 }
 
@@ -199,29 +248,31 @@ async function openTableAndCreateOrder() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
+        Authorization: "Bearer " + token,
       },
       body: JSON.stringify({ table_id: selectedTableId }),
     });
-
     const data = await res.json();
     if (data.status === "success") {
       currentOrderId = data.metaData.order.id;
+    } else {
+      alert("Không thể mở bàn");
     }
   } catch (err) {
-    console.error("Không thể mở bàn:", err);
+    alert("Lỗi hệ thống khi mở bàn");
   }
 }
 
 async function addToOrder(productId, productName, price) {
   if (!currentOrderId) await openTableAndCreateOrder();
+  if (!currentOrderId) return;
 
   try {
     const res = await fetch("http://localhost:3002/api/order/add-item", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
+        Authorization: "Bearer " + token,
       },
       body: JSON.stringify({
         order_id: currentOrderId,
@@ -229,37 +280,40 @@ async function addToOrder(productId, productName, price) {
         quantity: 1,
       }),
     });
-
     const data = await res.json();
     if (data.status === "success") {
       alert(`Đã thêm ${productName}`);
+    } else {
+      alert("Không thể thêm món");
     }
   } catch (err) {
-    console.error("Lỗi khi thêm món:", err);
+    alert("Lỗi khi thêm món");
   }
 }
 
 async function submitOrder() {
   if (!currentOrderId) return alert("Bạn chưa gọi món nào");
 
-  const res = await fetch("http://localhost:3002/api/order/send", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + localStorage.getItem("token"),
-    },
-    body: JSON.stringify({ order_id: currentOrderId }),
-  });
-
-  const data = await res.json();
-  if (data.status === "success") {
-    alert("Gửi đơn thành công!");
-    currentOrderId = null;
-  } else {
-    alert("Không thể gửi đơn");
+  try {
+    const res = await fetch("http://localhost:3002/api/order/send", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+      body: JSON.stringify({ order_id: currentOrderId }),
+    });
+    const data = await res.json();
+    if (data.status === "success") {
+      alert("Gửi đơn thành công!");
+      currentOrderId = null;
+    } else {
+      alert("Không thể gửi đơn");
+    }
+  } catch (err) {
+    alert("Lỗi khi gửi đơn");
   }
 }
 </script>
-
 </body>
 </html>

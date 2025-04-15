@@ -111,7 +111,10 @@ const productService = {
     }
 
     return products;
+  },getAllProducts: async () => {
+    return await prisma.product.findMany();
   },
+  
   updateProduct: async (req) => {
     const { id } = req.params;
     const { categoryId, name, description, price } = req.body;

@@ -107,21 +107,39 @@
         
 </style>
 <script>
-      $(document).ready(function () {
-            const correctSecretCode = "1234"; // Mã xác nhận tạm thời
-        
-            $("#unlockTableBtn").click(function () {
-                let selectedTable = $("#tableSelect").val();
-                let secretCode = $("#secretCodeInput").val();
-        
-                if (selectedTable !== "" && secretCode === correctSecretCode) {
-                    sessionStorage.setItem("tableNumber", selectedTable); // Lưu số bàn vào session
-                    window.location.href = "index.html"; // Chuyển hướng sang index.html
-                } else {
-                    $("#errorMsg").show();
-                }
-            });
-        });
-        
-        
+       $(document).ready(function () {
+  const role = localStorage.getItem("role");
+  const token = localStorage.getItem("token");
+
+  if (!token || role !== "waiter") {
+    return window.location.href = "login.html";
+  }
+
+  // Xác minh mã
+  $("#unlockTableBtn").click(async function () {
+    const selectedTable = $("#tableSelect").val();
+    const secretCode = $("#secretCodeInput").val();
+
+    const res = await fetch("http://localhost:3005/api/secret/verify", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+      body: JSON.stringify({ code: secretCode }),
+    });
+
+    const data = await res.json();
+    if (data.status === "success" && data.metaData === true) {
+      sessionStorage.setItem("tableNumber", selectedTable);
+      localStorage.setItem("verifiedCode", "true");
+      window.location.href = "waiter.html";
+    } else {
+      $("#errorMsg").text("Mã không đúng!").show();
+    }
+  });
+});
+
+    
 </script>
+    

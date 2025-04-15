@@ -70,6 +70,17 @@ const productController = {
       res.status(resData.code).json(resData);
     }
   },
+  getAllProducts: async (req, res) => {
+    try {
+      const data = await productService.getAllProducts();
+      const resData = responseSuccess(data, `Lấy toàn bộ sản phẩm`, 200);
+      res.status(resData.code).json(resData);
+    } catch (error) {
+      const resData = responseError(error.message, 500);
+      res.status(resData.code).json(resData);
+    }
+  },
+  
   getProductsByCategory: async (req, res) => {
     try {
       const data = await productService.getProductsByCategory(req);
