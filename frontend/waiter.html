@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Wave Cafe - Waiter</title>
+    <title>Order</title>
     <!-- Bootstrap CSS -->
     <link
       rel="stylesheet"
@@ -20,6 +20,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
   </head>
+
   <body>
     <div class="tm-container">
       <div class="tm-row">
@@ -28,7 +29,7 @@
           <div class="tm-left-inner">
             <div class="tm-site-header">
               <i class="fas fa-coffee fa-3x tm-site-logo"></i>
-              <h1 class="tm-site-name">Wave Cafe - Waiter</h1>
+              <h1 class="tm-site-name">Order</h1>
             </div>
             <nav class="tm-site-nav">
               <ul class="tm-site-nav-ul">
@@ -150,7 +151,6 @@
         }
       }
 
-      // Hàm loadProductsByCategory(): Load sản phẩm theo danh mục và render vào giao diện
       async function loadProductsByCategory(categoryId, tabId) {
         try {
           const res = await fetch(
@@ -167,7 +167,15 @@
             data.metaData.forEach((p) => {
               const item = document.createElement("div");
               item.className = "tm-list-item";
-              const htmlContent = `
+
+              const isAvailable = p.is_available;
+              console.log(`Product ID: ${p.id}, Available: ${isAvailable}`);
+
+              // Kiểm tra trạng thái và tạo giao diện phù hợp
+              let htmlContent = "";
+              if (isAvailable) {
+                // Giao diện cho sản phẩm có sẵn
+                htmlContent = `
                 <img src="/backend/product-service/images/${p.imageUrl}" class="tm-list-item-img" alt="${p.name}">
                 <div class="tm-black-bg tm-list-item-text">
                   <h3 class="tm-list-item-name">
@@ -175,12 +183,28 @@
                     <span class="tm-list-item-price">$${p.price}</span>
                   </h3>
                   <p class="tm-list-item-description">${p.description}</p>
-                  <!-- Nút giảm, số lượng, tăng -->
                   <button class="btn btn-sm btn-secondary decrease" data-item="${p.id}">-</button>
                   <span id="qty-${p.id}" class="mx-2">0</span>
                   <button class="btn btn-sm btn-primary increase" data-item="${p.id}">+</button>
                 </div>
               `;
+              } else {
+                // Giao diện cho sản phẩm hết món
+                htmlContent = `
+                <img src="/backend/product-service/images/${p.imageUrl}" class="tm-list-item-img" alt="${p.name}">
+                <div class="tm-black-bg tm-list-item-text">
+                  <h3 class="tm-list-item-name">
+                    ${p.name}
+                    <span class="tm-list-item-price">$${p.price}</span>
+                  </h3>
+                  <p class="tm-list-item-description">${p.description}</p>
+                  <button class="btn btn-sm btn-danger decrease" data-item="${p.id}" disabled>-</button>
+                  <span id="qty-${p.id}" class="mx-2">Hết món</span>
+                  <button class="btn btn-sm btn-danger increase" data-item="${p.id}" disabled>+</button>
+                </div>
+              `;
+              }
+
               item.innerHTML = htmlContent;
               container.appendChild(item);
             });
@@ -192,6 +216,12 @@
 
       // Event delegation: Khi nhấn nút "+" hoặc "-", chỉ cập nhật số lượng hiển thị trên giao diện
       $(document).on("click", ".increase", function () {
+        const isAvailable = $(this).attr("disabled");
+        if (isAvailable) {
+          e.preventDefault(); // Ngừng hành động nếu nút bị disabled
+          return;
+        }
+
         const itemId = $(this).data("item");
         const qtyElement = $("#qty-" + itemId);
         let qty = parseInt(qtyElement.text()) || 0;
@@ -199,6 +229,12 @@
       });
 
       $(document).on("click", ".decrease", function () {
+        const isAvailable = $(this).attr("disabled");
+        if (isAvailable) {
+          e.preventDefault(); // Ngừng hành động nếu nút bị disabled
+          return;
+        }
+
         const itemId = $(this).data("item");
         const qtyElement = $("#qty-" + itemId);
         let qty = parseInt(qtyElement.text()) || 0;

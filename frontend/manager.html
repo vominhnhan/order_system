@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Wave Cafe - Manager</title>
+    <title>Manager</title>
     <link rel="stylesheet" href="fontawesome/css/all.min.css" />
     <link
       href="https://fonts.googleapis.com/css?family=Open+Sans:300,400"
@@ -150,21 +150,19 @@
       // Hàm kiểm tra mã đã được tạo trong ngày chưa
       function checkExistingSecretCode() {
         $.ajax({
-          url: "http://localhost:3005/api/secret/verify", // API kiểm tra mã đã tạo trong ngày
+          url: "http://localhost:3005/api/secret/verify",
           type: "POST",
           headers: {
-            Authorization: "Bearer " + localStorage.getItem("token"), // Token nếu có
+            Authorization: "Bearer " + localStorage.getItem("token"),
           },
           success: function (data) {
             console.log(data);
             if (data.status === "success" && data.metaData) {
-              // Nếu có mã thì hiển thị luôn mã đó và vô hiệu hóa nút tạo mới
               $("#secretCodeDisplay").text(
                 "Secret code: " + data.metaData.code
               );
               $("#generateSecretCode").prop("disabled", true);
             } else {
-              // Nếu không có mã, cho phép tạo mã mới
               $("#generateSecretCode").prop("disabled", false);
             }
           },
@@ -182,24 +180,21 @@
         let currentTime = new Date().getTime();
 
         if (currentTime - lastGeneratedTime >= cooldownTime) {
-          // Gửi yêu cầu tới API để tạo mã
           $.ajax({
-            url: "http://localhost:3005/api/secret/generate", // Đường dẫn API
+            url: "http://localhost:3005/api/secret/generate",
             type: "POST",
             headers: {
-              Authorization: "Bearer " + localStorage.getItem("token"), // Thêm token nếu cần
+              Authorization: "Bearer " + localStorage.getItem("token"),
             },
             success: function (data) {
-              // Hiển thị mã được tạo
               $("#secretCodeDisplay").text("Secret Code: " + data.metaData);
 
-              // Ẩn mã sau 5 giây và quay lại trạng thái ban đầu
               setTimeout(function () {
                 $("#secretCodeDisplay").text("");
-              }, 5000); // 5 giây sau sẽ ẩn thông báo
+              }, 5000);
 
-              lastGeneratedTime = currentTime; // Cập nhật thời gian
-              $(this).prop("disabled", true); // Disable nút sau khi tạo mã
+              lastGeneratedTime = currentTime;
+              $(this).prop("disabled", true);
               startCooldownTimer();
             },
             error: function (err) {
@@ -311,15 +306,21 @@
               item.className = "tm-list-item";
 
               const htmlContent = `
-              <img src="/backend/product-service/images/${p.imageUrl}" class="tm-list-item-img" alt="${p.name}">
+              <img src="/backend/product-service/images/${
+                p.imageUrl
+              }" class="tm-list-item-img" alt="${p.name}">
               <div class="tm-black-bg tm-list-item-text">
                 <h3 class="tm-list-item-name">
                   ${p.name}
                   <span class="tm-list-item-price">$${p.price}</span>
                 </h3>
                 <p class="tm-list-item-description">${p.description}</p>
-                <button class="btn btn-sm btn-danger mr-2 toggle-availability" data-item="${p.id}">Hết món</button>
-
+                <button class="btn btn-sm ${
+                  p.is_available ? "btn-danger" : "btn-success"
+                } mr-2 toggle-availability" 
+                          data-item="${p.id}">
+                    ${p.is_available ? "Hết món" : "Còn món"}
+                  </button>
               </div>
             `;
               item.innerHTML = htmlContent;
@@ -331,24 +332,27 @@
         }
       }
 
+      // Xử lý sự kiện click nút toggle-availability
       $(document).on("click", ".toggle-availability", function () {
         const button = $(this);
-        const productId = button.data("item"); // Get product ID
-        const isAvailable = button.hasClass("btn-success") ? 0 : 1; // Toggle availability (0 or 1)
+        const productId = button.data("item");
+        const isAvailable = button.hasClass("btn-success") ? 0 : 1;
 
         console.log(
-          `Button clicked for product ${productId}. Setting availability to ${isAvailable}`
+          `Toggling availability for product ${productId} to ${isAvailable}`
         );
 
-        // Send AJAX request to update product availability
+        // Gửi request đến API endpoint mới
         $.ajax({
-          url: "http://localhost:3002/api/products/toggle-availability", // Corrected URL
-          type: "POST",
+          url: `http://localhost:3004/api/products/${productId}/availability`,
+          type: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
           data: JSON.stringify({
-            product_id: productId,
             is_available: isAvailable,
           }),
-          contentType: "application/json",
           success: function (response) {
             if (response.status === "success") {
               if (isAvailable === 1) {
@@ -364,18 +368,11 @@
               }
             } else {
               alert("Có lỗi khi cập nhật trạng thái món ăn!");
-              console.error("Lỗi khi cập nhật trạng thái:", error); // In chi tiết lỗi
-              res
-                .status(500)
-                .json({
-                  status: "error",
-                  message: "Lỗi khi cập nhật trạng thái",
-                });
             }
           },
           error: function (err) {
-            console.error("Error in AJAX request:", err);
-            alert("Có lỗi khi cập nhật món ăn!");
+            console.error("Error updating product availability:", err);
+            alert("Có lỗi khi cập nhật trạng thái món ăn!");
           },
         });
       });
