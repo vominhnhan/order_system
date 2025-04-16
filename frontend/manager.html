@@ -341,6 +341,50 @@
           console.error("Lỗi khi tải sản phẩm:", err);
         }
       }
+
+      $(document).on("click", ".toggle-availability", function () {
+        const button = $(this);
+        const productId = button.data("item");
+        const isAvailable = button.hasClass("btn-success") ? 0 : 1;
+
+        console.log(
+          `Toggling availability for product ${productId} to ${isAvailable}`
+        );
+
+        // Gọi API để cập nhật trạng thái
+        $.ajax({
+          url: `http://localhost:3004/api/products/${productId}/availability`,
+          type: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+          data: JSON.stringify({
+            is_available: isAvailable,
+          }),
+          success: function (response) {
+            if (response.status === "success") {
+              if (isAvailable === 1) {
+                button
+                  .removeClass("btn-danger")
+                  .addClass("btn-success")
+                  .text("Còn món");
+              } else {
+                button
+                  .removeClass("btn-success")
+                  .addClass("btn-danger")
+                  .text("Hết món");
+              }
+            } else {
+              alert("Có lỗi khi cập nhật trạng thái món ăn!");
+            }
+          },
+          error: function (err) {
+            console.error("Error updating product availability:", err);
+            alert("Có lỗi khi cập nhật trạng thái món ăn!");
+          },
+        });
+      });
     </script>
   </body>
 </html>

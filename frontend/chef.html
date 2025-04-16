@@ -112,25 +112,21 @@
     <script>
       let isCategoriesLoaded = false;
 
-      // Demo order static - thay bằng API gọi về sau
-      const demoOrders = [
-        {
-          id: 1,
-          dish: "Pizza Hải Sản",
-          quantity: 2,
-          table: 5,
-          note: "Ít cay",
-          time: "12:30 PM",
-        },
-        {
-          id: 2,
-          dish: "Bún bò Huế",
-          quantity: 1,
-          table: 3,
-          note: "Không hành",
-          time: "12:35 PM",
-        },
-      ];
+      async function loadOrders() {
+        try {
+          const res = await fetch("http://localhost:3001/api/chef/orders", {
+            headers: {
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          });
+          const data = await res.json();
+          if (data.status === "success") {
+            renderOrders(data.metaData);
+          }
+        } catch (err) {
+          console.error("Lỗi khi tải danh sách order:", err);
+        }
+      }
 
       function renderOrders(orders) {
         const tbody = document.getElementById("orderList");
@@ -138,18 +134,42 @@
         orders.forEach((order) => {
           const row = document.createElement("tr");
           row.id = `order-${order.id}`;
+
+          // Kiểm tra status và hiển thị badge tương ứng
+          let statusBadge;
+          switch (order.status) {
+            case "PREPARING":
+              statusBadge = '<span class="badge badge-warning">Đang làm</span>';
+              break;
+            case "COMPLETED":
+              statusBadge =
+                '<span class="badge badge-success">Hoàn thành</span>';
+              break;
+            case "CANCELLED":
+              statusBadge = '<span class="badge badge-danger">Đã hủy</span>';
+              break;
+            default:
+              statusBadge = '<span class="badge badge-warning">Đang làm</span>';
+          }
+
           row.innerHTML = `
-            <td>${order.dish}</td>
-            <td>${order.quantity}</td>
-            <td>${order.table}</td>
-            <td>${order.note}</td>
-            <td>${order.time}</td>
-            <td><span class="badge badge-warning">Đang làm</span></td>
-            <td>
-              <button class="btn btn-sm btn-success completeOrder" data-id="${order.id}">Hoàn thành</button>
-              <button class="btn btn-sm btn-danger cancelOrder" data-id="${order.id}">Hủy</button>
-            </td>
-          `;
+      <td>${order.dish}</td>
+      <td>${order.quantity}</td>
+      <td>${order.table}</td>
+      <td>${order.note || ""}</td>
+      <td>${new Date(order.time).toLocaleTimeString()}</td>
+      <td>${statusBadge}</td>
+      <td>
+        ${
+          order.status === "PREPARING"
+            ? `
+          <button class="btn btn-sm btn-success completeOrder" data-id="${order.id}">Hoàn thành</button>
+          <button class="btn btn-sm btn-danger cancelOrder" data-id="${order.id}">Hủy</button>
+        `
+            : ""
+        }
+      </td>
+    `;
           tbody.appendChild(row);
         });
       }
@@ -255,7 +275,11 @@
       }
 
       $(document).ready(function () {
-        renderOrders(demoOrders);
+        // Load initial orders
+        loadOrders();
+
+        // Set up auto-refresh every 30 seconds
+        setInterval(loadOrders, 30000);
 
         // Menu Link Click Handler
         $("#menuLink").click(function () {
@@ -279,24 +303,58 @@
         });
 
         // Complete Order Handler
-        $(document).on("click", ".completeOrder", function () {
+        $(document).on("click", ".completeOrder", async function () {
           const id = $(this).data("id");
-          const row = $(`#order-${id}`);
-          row
-            .find("td:nth-child(6) span")
-            .removeClass("badge-warning")
-            .addClass("badge-success")
-            .text("Hoàn thành");
-          $(this).remove();
-          setTimeout(() => row.fadeOut(300, () => row.remove()), 3000);
+          try {
+            const res = await fetch(
+              `http://localhost:3001/api/chef/orders/${id}/complete`,
+              {
+                method: "PATCH",
+                headers: {
+                  Authorization: "Bearer " + localStorage.getItem("token"),
+                },
+              }
+            );
+            const data = await res.json();
+            if (data.status === "success") {
+              const row = $(`#order-${id}`);
+              row
+                .find("td:nth-child(6) span")
+                .removeClass("badge-warning")
+                .addClass("badge-success")
+                .text("Hoàn thành");
+              row.find("td:last-child").empty();
+              setTimeout(() => row.fadeOut(300, () => row.remove()), 3000);
+            }
+          } catch (err) {
+            console.error("Lỗi khi hoàn thành order:", err);
+            alert("Có lỗi xảy ra khi hoàn thành order!");
+          }
         });
 
         // Cancel Order Handler
-        $(document).on("click", ".cancelOrder", function () {
+        $(document).on("click", ".cancelOrder", async function () {
           const id = $(this).data("id");
-          $(`#order-${id}`).fadeOut(300, function () {
-            $(this).remove();
-          });
+          try {
+            const res = await fetch(
+              `http://localhost:3001/api/chef/orders/${id}/cancel`,
+              {
+                method: "PATCH",
+                headers: {
+                  Authorization: "Bearer " + localStorage.getItem("token"),
+                },
+              }
+            );
+            const data = await res.json();
+            if (data.status === "success") {
+              $(`#order-${id}`).fadeOut(300, function () {
+                $(this).remove();
+              });
+            }
+          } catch (err) {
+            console.error("Lỗi khi hủy order:", err);
+            alert("Có lỗi xảy ra khi hủy order!");
+          }
         });
 
         // Toggle Availability Handler
@@ -344,18 +402,19 @@
           });
         });
       });
-      // Hàm logout: Gọi API logout trong Auth Service, xóa token và chuyển hướng về trang login
+
+      // Hàm logout
       function logout() {
         $.ajax({
-          url: "http://localhost:3001/api/auth/logout", // Điều chỉnh URL theo Auth Service của bạn
+          url: "http://localhost:3001/api/auth/logout",
           method: "POST",
           headers: {
             Authorization: "Bearer " + localStorage.getItem("token"),
           },
           success: function (res) {
             console.log("Logout response:", res);
-            localStorage.removeItem("token"); // Xóa token khỏi localStorage
-            window.location.href = "login.html"; // Chuyển hướng về trang login
+            localStorage.removeItem("token");
+            window.location.href = "login.html";
           },
           error: function (err) {
             console.error("Lỗi khi logout:", err);
