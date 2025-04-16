@@ -15,11 +15,12 @@ waiterRouter.post(
   waiterController.openTable
 );
 
-// Gọi món
-waiterRouter.post(
-  "/order/add-item",
+// Lấy danh sách bàn
+waiterRouter.get(
+  "/tables",
   authMiddleware,
-  waiterController.addOrderItem
+  authorizeRoles("waiter", "manager"),
+  waiterController.getTables
 );
 
 // Gửi đơn hàng
@@ -28,6 +29,13 @@ waiterRouter.post(
   authMiddleware,
   authorizeRoles("waiter", "manager"),
   waiterController.sendOrder
+);
+
+waiterRouter.post(
+  "/product/toggle-availability",
+  authMiddleware,
+  authorizeRoles("manager"), // Only manager can toggle availability
+  waiterController.toggleAvailability
 );
 
 export default waiterRouter;

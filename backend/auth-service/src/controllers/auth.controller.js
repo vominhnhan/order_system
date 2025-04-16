@@ -26,6 +26,10 @@ const authController = {
       res.status(resData.code).json(resData);
     }
   },
+
+  logout: async (req, res) => {
+    return res.json({ status: "success", message: "Đăng xuất thành công!" });
+  },
 };
 
 export default authController;

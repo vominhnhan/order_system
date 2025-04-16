@@ -86,6 +86,7 @@ const productService = {
 
     return product;
   },
+  //
   getProductsByCategory: async (req) => {
     const { id } = req.params;
     // Kiểm tra danh mục có tồn tại hay không
@@ -110,52 +111,17 @@ const productService = {
       throw new Error("Không có sản phẩm nào trong danh mục này");
     }
 
-    return products;
+    // Trả về thông tin sản phẩm, bao gồm cả trạng thái is_available
+    return products.map((product) => ({
+      id: product.id,
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      is_available: product.is_available, // Trả về trạng thái is_available
+      imageUrl: product.imageUrl,
+    }));
   },
-  updateProduct: async (req) => {
-    const { id } = req.params;
-    const { categoryId, name, description, price } = req.body;
 
-    // Kiểm tra danh mục có tồn tại hay không
-    const category = await prisma.category.findUnique({
-      where: {
-        id: Number(categoryId),
-      },
-    });
-    if (!category) {
-      throw new Error("Không tìm thấy danh mục");
-    }
-
-    // Kiểm tra giá sản phẩm
-    if (isNaN(price) || Number(price) < 0) {
-      throw new Error("Giá sản phẩm không hợp lệ");
-    }
-
-    // Kiểm tra sản phẩm có tồn tại không
-    const product = await prisma.product.findUnique({
-      where: {
-        id: Number(id),
-      },
-    });
-    if (!product) {
-      throw new Error("Không tìm thấy sản phẩm");
-    }
-
-    // Cập nhật sản phẩm
-    const updateProduct = await prisma.product.update({
-      where: {
-        id: Number(id),
-      },
-      data: {
-        category_id: Number(categoryId),
-        name: name,
-        description: description,
-        price: Number(price),
-      },
-    });
-
-    return updateProduct;
-  },
   removeProduct: async (req) => {
     const { id } = req.params;
 

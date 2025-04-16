@@ -19,7 +19,11 @@ const secretController = {
   verify: async (req, res) => {
     try {
       const data = await secretService.verify(req);
-      const resData = responseSuccess(data, `Xác thực mã thành công`, 200);
+      const resData = responseSuccess(
+        { code: data },
+        `Xác thực mã thành công`,
+        200
+      );
       res.status(resData.code).json(resData);
     } catch (error) {
       const resData = responseError(error.message, 400);

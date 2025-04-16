@@ -27,7 +27,7 @@ const secretService = {
       throw new Error("Mã không hợp lệ");
     }
 
-    return !!checkCode;
+    return checkCode.code;
   },
 };
 

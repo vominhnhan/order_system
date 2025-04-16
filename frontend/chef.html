@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chef Orders</title>
+    <link rel="stylesheet" href="fontawesome/css/all.min.css" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans:300,400"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/tooplate-wave-cafe.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+  </head>
+  <body>
+    <div class="tm-container">
+      <div class="tm-row">
+        <!-- Left sidebar -->
+        <div class="tm-left">
+          <div class="tm-left-inner">
+            <div class="tm-site-header">
+              <i class="fas fa-coffee fa-3x tm-site-logo"></i>
+              <h1 class="tm-site-name">Chef</h1>
+            </div>
+            <nav class="tm-site-nav">
+              <ul class="tm-site-nav-ul">
+                <li class="tm-page-nav-item">
+                  <a href="#" class="tm-page-link" id="menuLink">
+                    <i class="fas fa-mug-hot tm-page-link-icon"></i>
+                    <span>Menu</span>
+                  </a>
+                </li>
+                <li class="tm-page-nav-item">
+                  <a href="#" class="tm-page-link active" id="managementLink">
+                    <i class="fas fa-comments tm-page-link-icon"></i>
+                    <span>Danh sách món</span>
+                  </a>
+                </li>
+              </ul>
+            </nav>
+            <!-- Nút Logout -->
+            <div class="mt-4">
+              <button id="logoutBtn" class="btn btn-warning btn-block">
+                <i class="fas fa-sign-out-alt"></i> Logout
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Menu Section -->
+        <div
+          class="tm-right"
+          id="menuSection"
+          style="padding: 20px; border-radius: 10px; display: none"
+        >
+          <main class="tm-main">
+            <div class="tm-page-content">
+              <div id="drink" class="tm-page-content">
+                <nav class="tm-black-bg tm-drinks-nav">
+                  <ul id="categoryTabs"></ul>
+                </nav>
+                <div id="drinkTabContents"></div>
+              </div>
+            </div>
+          </main>
+        </div>
+
+        <!-- Order List Section -->
+        <div class="tm-right" id="orderListSection">
+          <main class="tm-main">
+            <div class="tm-page-content">
+              <h2 class="tm-text-primary text-center mb-4">
+                Danh sách Order trong bếp
+              </h2>
+              <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                  <thead class="thead-dark">
+                    <tr>
+                      <th>Món</th>
+                      <th>Số lượng</th>
+                      <th>Bàn số</th>
+                      <th>Ghi chú</th>
+                      <th>Thời gian</th>
+                      <th>Trạng thái</th>
+                      <th>Hành động</th>
+                    </tr>
+                  </thead>
+                  <tbody id="orderList">
+                    <!-- Order sẽ được load động ở đây -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
+
+    <!-- Background video -->
+    <div class="tm-video-wrapper">
+      <i id="tm-video-control-button" class="fas fa-pause"></i>
+      <video autoplay muted loop id="tm-video">
+        <source src="video/wave-cafe-video-bg.mp4" type="video/mp4" />
+      </video>
+    </div>
+
+    <script>
+      let isCategoriesLoaded = false;
+
+      async function loadOrders() {
+        try {
+          const res = await fetch("http://localhost:3001/api/chef/orders", {
+            headers: {
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          });
+          const data = await res.json();
+          if (data.status === "success") {
+            renderOrders(data.metaData);
+          }
+        } catch (err) {
+          console.error("Lỗi khi tải danh sách order:", err);
+        }
+      }
+
+      function renderOrders(orders) {
+        const tbody = document.getElementById("orderList");
+        tbody.innerHTML = "";
+        orders.forEach((order) => {
+          const row = document.createElement("tr");
+          row.id = `order-${order.id}`;
+
+          // Kiểm tra status và hiển thị badge tương ứng
+          let statusBadge;
+          switch (order.status) {
+            case "PREPARING":
+              statusBadge = '<span class="badge badge-warning">Đang làm</span>';
+              break;
+            case "COMPLETED":
+              statusBadge =
+                '<span class="badge badge-success">Hoàn thành</span>';
+              break;
+            case "CANCELLED":
+              statusBadge = '<span class="badge badge-danger">Đã hủy</span>';
+              break;
+            default:
+              statusBadge = '<span class="badge badge-warning">Đang làm</span>';
+          }
+
+          row.innerHTML = `
+      <td>${order.dish}</td>
+      <td>${order.quantity}</td>
+      <td>${order.table}</td>
+      <td>${order.note || ""}</td>
+      <td>${new Date(order.time).toLocaleTimeString()}</td>
+      <td>${statusBadge}</td>
+      <td>
+        ${
+          order.status === "PREPARING"
+            ? `
+          <button class="btn btn-sm btn-success completeOrder" data-id="${order.id}">Hoàn thành</button>
+          <button class="btn btn-sm btn-danger cancelOrder" data-id="${order.id}">Hủy</button>
+        `
+            : ""
+        }
+      </td>
+    `;
+          tbody.appendChild(row);
+        });
+      }
+
+      // Hàm tải danh mục
+      async function loadCategories() {
+        try {
+          const res = await fetch("http://localhost:3004/api/category", {
+            headers: {
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          });
+          const data = await res.json();
+          if (data.status === "success") {
+            const seenNames = new Set();
+            const uniqueCategories = data.metaData.filter((cat) => {
+              if (seenNames.has(cat.name)) return false;
+              seenNames.add(cat.name);
+              return true;
+            });
+
+            const tabs = document.getElementById("categoryTabs");
+            const contents = document.getElementById("drinkTabContents");
+
+            // Clear previous categories
+            tabs.innerHTML = "";
+            contents.innerHTML = "";
+
+            for (let i = 0; i < uniqueCategories.length; i++) {
+              const cat = uniqueCategories[i];
+              const tabId = "tab-" + cat.id;
+
+              const li = document.createElement("li");
+              li.innerHTML = `<a href="#" class="tm-tab-link ${
+                i === 0 ? "active" : ""
+              }" data-id="${tabId}">${cat.name}</a>`;
+              tabs.appendChild(li);
+
+              const div = document.createElement("div");
+              div.id = tabId;
+              div.className = "tm-tab-content";
+              if (i !== 0) div.style.display = "none";
+              div.innerHTML = `<div class="tm-list"></div>`;
+              contents.appendChild(div);
+
+              // Load products for each category
+              await loadProductsByCategory(cat.id, tabId);
+            }
+
+            // Add event listeners for category tabs
+            $(".tm-tab-link").click(function (e) {
+              e.preventDefault();
+              $(".tm-tab-content").hide();
+              const tabId = $(this).data("id");
+              $("#" + tabId).show();
+              $(".tm-tab-link").removeClass("active");
+              $(this).addClass("active");
+            });
+          }
+        } catch (err) {
+          console.error("Lỗi khi tải danh mục:", err);
+        }
+      }
+
+      // Hàm tải sản phẩm theo danh mục
+      async function loadProductsByCategory(categoryId, tabId) {
+        try {
+          const res = await fetch(
+            `http://localhost:3004/api/products/category/${categoryId}`
+          );
+          const data = await res.json();
+          if (data.status === "success") {
+            const container = document.querySelector(`#${tabId} .tm-list`);
+            for (const p of data.metaData) {
+              const item = document.createElement("div");
+              item.className = "tm-list-item";
+
+              const htmlContent = `
+                <img src="/backend/product-service/images/${
+                  p.imageUrl
+                }" class="tm-list-item-img" alt="${p.name}">
+                <div class="tm-black-bg tm-list-item-text">
+                  <h3 class="tm-list-item-name">
+                    ${p.name}
+                    <span class="tm-list-item-price">$${p.price}</span>
+                  </h3>
+                  <p class="tm-list-item-description">${p.description}</p>
+                  <button class="btn btn-sm ${
+                    p.is_available ? "btn-danger" : "btn-success"
+                  } mr-2 toggle-availability" 
+                          data-item="${p.id}">
+                    ${p.is_available ? "Hết món" : "Còn món"}
+                  </button>
+                </div>
+              `;
+              item.innerHTML = htmlContent;
+              container.appendChild(item);
+            }
+          }
+        } catch (err) {
+          console.error("Lỗi khi load sản phẩm:", err);
+        }
+      }
+
+      $(document).ready(function () {
+        // Load initial orders
+        loadOrders();
+
+        // Set up auto-refresh every 30 seconds
+        setInterval(loadOrders, 30000);
+
+        // Menu Link Click Handler
+        $("#menuLink").click(function () {
+          $("#orderListSection").hide();
+          $("#menuSection").show();
+          $("#managementLink").removeClass("active");
+          $(this).addClass("active");
+
+          if (!isCategoriesLoaded) {
+            loadCategories();
+            isCategoriesLoaded = true;
+          }
+        });
+
+        // Management Link Click Handler
+        $("#managementLink").click(function () {
+          $("#menuSection").hide();
+          $("#orderListSection").show();
+          $("#menuLink").removeClass("active");
+          $(this).addClass("active");
+        });
+
+        // Complete Order Handler
+        $(document).on("click", ".completeOrder", async function () {
+          const id = $(this).data("id");
+          try {
+            const res = await fetch(
+              `http://localhost:3001/api/chef/orders/${id}/complete`,
+              {
+                method: "PATCH",
+                headers: {
+                  Authorization: "Bearer " + localStorage.getItem("token"),
+                },
+              }
+            );
+            const data = await res.json();
+            if (data.status === "success") {
+              const row = $(`#order-${id}`);
+              row
+                .find("td:nth-child(6) span")
+                .removeClass("badge-warning")
+                .addClass("badge-success")
+                .text("Hoàn thành");
+              row.find("td:last-child").empty();
+              setTimeout(() => row.fadeOut(300, () => row.remove()), 3000);
+            }
+          } catch (err) {
+            console.error("Lỗi khi hoàn thành order:", err);
+            alert("Có lỗi xảy ra khi hoàn thành order!");
+          }
+        });
+
+        // Cancel Order Handler
+        $(document).on("click", ".cancelOrder", async function () {
+          const id = $(this).data("id");
+          try {
+            const res = await fetch(
+              `http://localhost:3001/api/chef/orders/${id}/cancel`,
+              {
+                method: "PATCH",
+                headers: {
+                  Authorization: "Bearer " + localStorage.getItem("token"),
+                },
+              }
+            );
+            const data = await res.json();
+            if (data.status === "success") {
+              $(`#order-${id}`).fadeOut(300, function () {
+                $(this).remove();
+              });
+            }
+          } catch (err) {
+            console.error("Lỗi khi hủy order:", err);
+            alert("Có lỗi xảy ra khi hủy order!");
+          }
+        });
+
+        // Toggle Availability Handler
+        $(document).on("click", ".toggle-availability", function () {
+          const button = $(this);
+          const productId = button.data("item");
+          const isAvailable = button.hasClass("btn-success") ? 0 : 1;
+
+          console.log(
+            `Toggling availability for product ${productId} to ${isAvailable}`
+          );
+
+          // Gọi API để cập nhật trạng thái
+          $.ajax({
+            url: `http://localhost:3004/api/products/${productId}/availability`,
+            type: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+            data: JSON.stringify({
+              is_available: isAvailable,
+            }),
+            success: function (response) {
+              if (response.status === "success") {
+                if (isAvailable === 1) {
+                  button
+                    .removeClass("btn-danger")
+                    .addClass("btn-success")
+                    .text("Còn món");
+                } else {
+                  button
+                    .removeClass("btn-success")
+                    .addClass("btn-danger")
+                    .text("Hết món");
+                }
+              } else {
+                alert("Có lỗi khi cập nhật trạng thái món ăn!");
+              }
+            },
+            error: function (err) {
+              console.error("Error updating product availability:", err);
+              alert("Có lỗi khi cập nhật trạng thái món ăn!");
+            },
+          });
+        });
+      });
+
+      // Hàm logout
+      function logout() {
+        $.ajax({
+          url: "http://localhost:3001/api/auth/logout",
+          method: "POST",
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+          success: function (res) {
+            console.log("Logout response:", res);
+            localStorage.removeItem("token");
+            window.location.href = "login.html";
+          },
+          error: function (err) {
+            console.error("Lỗi khi logout:", err);
+            localStorage.removeItem("token");
+            window.location.href = "login.html";
+          },
+        });
+      }
+
+      // Gán sự kiện click cho nút Logout
+      $(document).on("click", "#logoutBtn", function () {
+        logout();
+      });
+    </script>
+  </body>
+</html>
