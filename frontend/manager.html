@@ -17,10 +17,10 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
   </head>
-
   <body>
     <div class="tm-container">
       <div class="tm-row">
+        <!-- Sidebar -->
         <div class="tm-left">
           <div class="tm-left-inner">
             <div class="tm-site-header">
@@ -43,6 +43,12 @@
                 </li>
               </ul>
             </nav>
+            <!-- Nút Logout -->
+            <div class="mt-4">
+              <button id="logoutBtn" class="btn btn-warning btn-block">
+                <i class="fas fa-sign-out-alt"></i> Logout
+              </button>
+            </div>
           </div>
         </div>
 
@@ -55,7 +61,6 @@
           <main class="tm-main">
             <div class="tm-page-content">
               <h2 class="tm-text-primary text-center mb-4">Quản lý hóa đơn</h2>
-
               <!-- Secret Code -->
               <div class="d-flex justify-content-between mb-3">
                 <button id="generateSecretCode" class="btn btn-danger">
@@ -67,7 +72,6 @@
                   style="font-size: 20px"
                 ></span>
               </div>
-
               <!-- Danh sách hóa đơn -->
               <div class="table-responsive">
                 <table class="table table-striped table-hover">
@@ -119,35 +123,60 @@
     </div>
 
     <script>
-      let isCategoriesLoaded = false;
       $(document).ready(function () {
-        // Hiển thị Menu khi người dùng chọn
+        // Sự kiện chuyển đổi giữa menu và quản lý
         $("#menuLink").click(function () {
-          $("#managementSection").hide(); // Ẩn quản lý
-          $("#menuSection").show(); // Hiển thị menu
+          $("#managementSection").hide();
+          $("#menuSection").show();
           $("#managementLink").removeClass("active");
           $(this).addClass("active");
 
-          // Kiểm tra xem danh mục đã được tải chưa, nếu chưa thì tải
-          if (!isCategoriesLoaded) {
-            loadCategories(); // Tải categories chỉ khi chưa tải
-            isCategoriesLoaded = true; // Đánh dấu đã tải
+          // Nếu chưa tải danh mục, tải danh mục
+          if (!window.isCategoriesLoaded) {
+            loadCategories();
+            window.isCategoriesLoaded = true;
           }
         });
 
-        // Hiển thị Quản lý khi người dùng chọn
         $("#managementLink").click(function () {
-          $("#menuSection").hide(); // Ẩn menu
-          $("#managementSection").show(); // Hiển thị quản lý
+          $("#menuSection").hide();
+          $("#managementSection").show();
           $("#menuLink").removeClass("active");
           $(this).addClass("active");
         });
+
+        // Sự kiện Logout
+        $("#logoutBtn").click(function () {
+          logout();
+        });
       });
+
+      // Hàm logout: Gọi API logout ở Auth Service, xóa token và chuyển về trang login
+      function logout() {
+        $.ajax({
+          url: "http://localhost:3000/api/auth/logout", // API logout Auth Service
+          method: "POST",
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+          success: function (res) {
+            console.log("Logout response:", res);
+            localStorage.removeItem("token");
+            window.location.href = "login.html";
+          },
+          error: function (err) {
+            console.error("Lỗi khi logout:", err);
+            localStorage.removeItem("token");
+            window.location.href = "login.html";
+          },
+        });
+      }
+
+      // Các hàm và biến liên quan secret code, danh mục, sản phẩm tương tự như cũ...
 
       let lastGeneratedTime = 0;
       const cooldownTime = 10 * 60 * 1000;
 
-      // Hàm kiểm tra mã đã được tạo trong ngày chưa
       function checkExistingSecretCode() {
         $.ajax({
           url: "http://localhost:3005/api/secret/verify",
@@ -167,15 +196,13 @@
             }
           },
           error: function (err) {
-            console.error("Lỗi khi kiểm tra mã hiện tại: ", err);
+            console.error("Lỗi khi kiểm tra mã hiện tại:", err);
           },
         });
       }
 
-      // Kiểm tra mã khi load trang
       checkExistingSecretCode();
 
-      // Khi nhấn nút tạo mã mới
       $("#generateSecretCode").click(function () {
         let currentTime = new Date().getTime();
 
@@ -188,11 +215,9 @@
             },
             success: function (data) {
               $("#secretCodeDisplay").text("Secret Code: " + data.metaData);
-
               setTimeout(function () {
                 $("#secretCodeDisplay").text("");
               }, 5000);
-
               lastGeneratedTime = currentTime;
               $(this).prop("disabled", true);
               startCooldownTimer();
@@ -214,14 +239,12 @@
         }
       });
 
-      // Bắt đầu bộ đếm ngược
       function startCooldownTimer() {
         let interval = setInterval(function () {
           let currentTime = new Date().getTime();
           let remainingTime = Math.ceil(
             (cooldownTime - (currentTime - lastGeneratedTime)) / 1000
           );
-
           if (remainingTime <= 0) {
             clearInterval(interval);
             $("#generateSecretCode").prop("disabled", false);
@@ -231,7 +254,6 @@
       }
 
       let categoryTabMap = {};
-      // Hàm tải danh mục
       async function loadCategories() {
         try {
           const res = await fetch("http://localhost:3004/api/category", {
@@ -250,34 +272,25 @@
 
             const tabs = document.getElementById("categoryTabs");
             const contents = document.getElementById("drinkTabContents");
-
-            // Clear previous categories before adding new ones
             tabs.innerHTML = "";
             contents.innerHTML = "";
-
             for (let i = 0; i < uniqueCategories.length; i++) {
               const cat = uniqueCategories[i];
               const tabId = "tab-" + cat.id;
               categoryTabMap[cat.name] = tabId;
-
               const li = document.createElement("li");
               li.innerHTML = `<a href="#" class="tm-tab-link ${
                 i === 0 ? "active" : ""
               }" data-id="${tabId}">${cat.name}</a>`;
               tabs.appendChild(li);
-
               const div = document.createElement("div");
               div.id = tabId;
               div.className = "tm-tab-content";
               if (i !== 0) div.style.display = "none";
               div.innerHTML = `<div class="tm-list"></div>`;
               contents.appendChild(div);
-
-              // Load sản phẩm cho từng danh mục
               await loadProductsByCategory(cat.id, tabId);
             }
-
-            // Gán sự kiện cho các tab danh mục
             $(".tm-tab-link").click(function (e) {
               e.preventDefault();
               $(".tm-tab-content").hide();
@@ -292,7 +305,6 @@
         }
       }
 
-      // Hàm tải sản phẩm theo danh mục
       async function loadProductsByCategory(categoryId, tabId) {
         try {
           const res = await fetch(
@@ -304,7 +316,6 @@
             for (const p of data.metaData) {
               const item = document.createElement("div");
               item.className = "tm-list-item";
-
               const htmlContent = `
               <img src="/backend/product-service/images/${
                 p.imageUrl
@@ -317,10 +328,9 @@
                 <p class="tm-list-item-description">${p.description}</p>
                 <button class="btn btn-sm ${
                   p.is_available ? "btn-danger" : "btn-success"
-                } mr-2 toggle-availability" 
-                          data-item="${p.id}">
-                    ${p.is_available ? "Hết món" : "Còn món"}
-                  </button>
+                } mr-2 toggle-availability" data-item="${p.id}">
+                  ${p.is_available ? "Hết món" : "Còn món"}
+                </button>
               </div>
             `;
               item.innerHTML = htmlContent;
@@ -328,54 +338,9 @@
             }
           }
         } catch (err) {
-          console.error("Lỗi khi load sản phẩm:", err);
+          console.error("Lỗi khi tải sản phẩm:", err);
         }
       }
-
-      // Xử lý sự kiện click nút toggle-availability
-      $(document).on("click", ".toggle-availability", function () {
-        const button = $(this);
-        const productId = button.data("item");
-        const isAvailable = button.hasClass("btn-success") ? 0 : 1;
-
-        console.log(
-          `Toggling availability for product ${productId} to ${isAvailable}`
-        );
-
-        // Gửi request đến API endpoint mới
-        $.ajax({
-          url: `http://localhost:3004/api/products/${productId}/availability`,
-          type: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + localStorage.getItem("token"),
-          },
-          data: JSON.stringify({
-            is_available: isAvailable,
-          }),
-          success: function (response) {
-            if (response.status === "success") {
-              if (isAvailable === 1) {
-                button
-                  .removeClass("btn-danger")
-                  .addClass("btn-success")
-                  .text("Còn món");
-              } else {
-                button
-                  .removeClass("btn-success")
-                  .addClass("btn-danger")
-                  .text("Hết món");
-              }
-            } else {
-              alert("Có lỗi khi cập nhật trạng thái món ăn!");
-            }
-          },
-          error: function (err) {
-            console.error("Error updating product availability:", err);
-            alert("Có lỗi khi cập nhật trạng thái món ăn!");
-          },
-        });
-      });
     </script>
   </body>
 </html>

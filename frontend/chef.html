@@ -43,6 +43,12 @@
                 </li>
               </ul>
             </nav>
+            <!-- Nút Logout -->
+            <div class="mt-4">
+              <button id="logoutBtn" class="btn btn-warning btn-block">
+                <i class="fas fa-sign-out-alt"></i> Logout
+              </button>
+            </div>
           </div>
         </div>
 
@@ -337,6 +343,31 @@
             },
           });
         });
+      });
+      // Hàm logout: Gọi API logout trong Auth Service, xóa token và chuyển hướng về trang login
+      function logout() {
+        $.ajax({
+          url: "http://localhost:3001/api/auth/logout", // Điều chỉnh URL theo Auth Service của bạn
+          method: "POST",
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+          success: function (res) {
+            console.log("Logout response:", res);
+            localStorage.removeItem("token"); // Xóa token khỏi localStorage
+            window.location.href = "login.html"; // Chuyển hướng về trang login
+          },
+          error: function (err) {
+            console.error("Lỗi khi logout:", err);
+            localStorage.removeItem("token");
+            window.location.href = "login.html";
+          },
+        });
+      }
+
+      // Gán sự kiện click cho nút Logout
+      $(document).on("click", "#logoutBtn", function () {
+        logout();
       });
     </script>
   </body>
